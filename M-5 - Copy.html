@@ -1,0 +1,2969 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<!-- skill:chassis -->
+<style>
+/* =====================================================
+   PRESENTATION CHASSIS — style-invariant base styles
+   Fixed 1920×1080 canvas scaled to fit any viewport.
+   Customize colors, fonts, and chrome via :root tokens.
+   ===================================================== */
+
+/* ---------- Universal reset ---------- */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ---------- Theme tokens (override in your deck's CSS) ---------- */
+:root {
+    color-scheme: light;
+
+    --background:      #ffffff;
+    --foreground:      #111111;
+    --card:            #f5f5f5;
+    --card-foreground: var(--foreground);
+    --accent:          #c94a3d;
+    --accent-foreground: #ffffff;
+
+    --muted-foreground: color-mix(in srgb, var(--foreground) 55%, transparent);
+    --border:           color-mix(in srgb, var(--foreground) 12%, transparent);
+
+    --font-display: Georgia, serif;
+    --font-body: -apple-system, system-ui, sans-serif;
+    --font-mono: ui-monospace, monospace;
+
+    /* Reveal animation */
+    --reveal-duration: 0.8s;
+    --reveal-ease:     cubic-bezier(0.16, 1, 0.3, 1);
+    --reveal-distance: 28px;
+
+    /* Chrome (nav dots, keyboard hint) */
+    --nav-dot-size: 9px;
+    --nav-dot-radius: 50%;
+    --nav-dot-color: var(--foreground);
+    --nav-dot-active-color: var(--accent);
+    --nav-dot-opacity: 0.4;
+}
+
+/* ---------- Viewport lock + scroll snap ---------- */
+html, body { height: 100%; overflow-x: hidden; }
+html {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+}
+
+html, body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+}
+
+/* ---------- Type scale ----------
+   Fixed px sizes on a 1920×1080 canvas. The canvas is scaled to fit
+   any viewport via transform, so these sizes are absolute within the
+   design surface — no responsive units needed. */
+body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    font-size: 36px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1 { font-size: 120px; line-height: 1.05; letter-spacing: -0.02em; }
+h2 { font-size: 64px; line-height: 1.1; letter-spacing: -0.01em; }
+h3 { font-size: 44px; line-height: 1.2; }
+.eyebrow {
+    font-size: 24px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+ul, ol { padding-left: 48px; display: flex; flex-direction: column; gap: 24px; }
+li::marker { color: var(--accent); }
+
+/* ---------- Slide structure ----------
+   .slide is the authored 1920×1080 artboard.
+   The chassis wraps it in viewport + scale layers at runtime. */
+.slide-viewport {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    display: block;
+    position: relative;
+    background: var(--background);
+    isolation: isolate;
+    z-index: 1;
+}
+
+.slide-scale {
+    width: 1920px;
+    height: 1080px;
+    transform: translate(-50%, -50%) scale(var(--slide-scale, 1));
+    transform-origin: center center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+}
+
+.slide {
+    width: 1920px;
+    height: 1080px;
+    padding: 80px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 60px;
+    position: relative;
+    background: transparent;
+}
+
+
+/* ---------- Image defaults ---------- */
+img, .image-container {
+    max-width: 100%;
+    max-height: 540px;
+    object-fit: contain;
+}
+
+/* ---------- Reveal primitives ----------
+   Driven by chassis.js via the Web Animations API, not CSS transitions.
+   Put .reveal* or .step on ANY element — author CSS on the same element
+   (opacity, transform, transition, filter) never conflicts, because
+   WAAPI animations live in the animation cascade origin and win over
+   normal author declarations. The .dN stagger classes below still apply
+   to theme-authored CSS animations via animation-delay.
+
+   Variants: .reveal (fade + up), .reveal-left, .reveal-right,
+   .reveal-scale, .reveal-blur. .step stays hidden until the user
+   advances forward. Don't combine .step with .reveal* on the same
+   element. */
+
+/* FOUC guard: hide reveals until chassis.js marks the document ready. */
+:root:not(.reveals-ready) .reveal,
+:root:not(.reveals-ready) .reveal-left,
+:root:not(.reveals-ready) .reveal-right,
+:root:not(.reveals-ready) .reveal-scale,
+:root:not(.reveals-ready) .reveal-blur,
+:root:not(.reveals-ready) .step {
+    opacity: 0;
+}
+:root:not(.reveals-ready) .reveal-blur { filter: blur(10px); }
+
+/* ---------- Stagger delays (.d1 … .d8) ---------- */
+.slide.visible .d1 { transition-delay: 0.10s; animation-delay: 0.10s; }
+.slide.visible .d2 { transition-delay: 0.25s; animation-delay: 0.25s; }
+.slide.visible .d3 { transition-delay: 0.40s; animation-delay: 0.40s; }
+.slide.visible .d4 { transition-delay: 0.55s; animation-delay: 0.55s; }
+.slide.visible .d5 { transition-delay: 0.70s; animation-delay: 0.70s; }
+.slide.visible .d6 { transition-delay: 0.85s; animation-delay: 0.85s; }
+.slide.visible .d7 { transition-delay: 1.00s; animation-delay: 1.00s; }
+.slide.visible .d8 { transition-delay: 1.15s; animation-delay: 1.15s; }
+
+/* ---------- Nav dots ----------
+   Default: right-center (vertical stack on right edge).
+   Override with <body data-nav="bottom | top-right | hidden">
+<!-- Student copy: instructor-only answer reveals removed. -->. */
+.nav-dots {
+    position: fixed;
+    right: clamp(0.6rem, 1.5vw, 1.4rem);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.5rem, 1vh, 0.8rem);
+    z-index: 50;
+}
+
+body[data-nav="bottom"] .nav-dots {
+    right: auto;
+    top: auto;
+    bottom: clamp(1rem, 2.5vh, 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: row;
+}
+
+body[data-nav="top-right"] .nav-dots {
+    right: clamp(1rem, 2.5vw, 2rem);
+    top: clamp(1rem, 2.5vh, 2rem);
+    transform: none;
+    flex-direction: row;
+}
+
+body[data-nav="hidden"] .nav-dots { display: none; }
+
+body[data-nav="bottom"] .keyboard-hint {
+    left: clamp(1rem, 2vw, 1.5rem);
+    transform: none;
+}
+
+.nav-dots button {
+    width: var(--nav-dot-size);
+    height: var(--nav-dot-size);
+    border-radius: var(--nav-dot-radius);
+    border: 1.5px solid var(--nav-dot-color);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+    opacity: var(--nav-dot-opacity);
+}
+.nav-dots button:hover { opacity: 0.85; transform: scale(1.15); }
+.nav-dots button:focus-visible {
+    outline: 2px solid var(--nav-dot-active-color);
+    outline-offset: 3px;
+    opacity: 1;
+}
+.nav-dots button.active {
+    background: var(--nav-dot-active-color);
+    border-color: var(--nav-dot-active-color);
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* ---------- Keyboard hint ---------- */
+.keyboard-hint {
+    position: fixed;
+    bottom: clamp(0.6rem, 1.2vh, 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--muted-foreground);
+    z-index: 50;
+    opacity: 0.7;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+.keyboard-hint kbd {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.9em;
+    padding: 0.05em 0.4em;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background: var(--background);
+    margin: 0 0.15em;
+}
+
+/* ---------- Credit line ---------- */
+.chassis-credit {
+    position: fixed;
+    bottom: clamp(0.6rem, 1.2vh, 1rem);
+    left: clamp(1rem, 2vw, 1.5rem);
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--muted-foreground);
+    letter-spacing: 0.02em;
+    z-index: 50;
+    opacity: 0.7;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+.chassis-credit .chassis-credit-emoji {
+    font-style: normal;
+    margin: 0 0.15em;
+}
+
+body[data-nav="bottom"] .chassis-credit {
+    left: auto;
+    right: clamp(1rem, 2vw, 1.5rem);
+}
+
+/* ---------- Custom cursor ---------- */
+.chassis-cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: var(--accent);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    will-change: transform;
+}
+.chassis-cursor.visible { opacity: 1; }
+body.artifact-editor-editing .chassis-cursor { display: none; }
+
+@media (hover: none) {
+    .chassis-cursor { display: none; }
+}
+
+body.chassis-cursor-active:not(.artifact-editor-editing),
+body.chassis-cursor-active:not(.artifact-editor-editing) * { cursor: none; }
+
+/* ---------- Opt-outs ---------- */
+body[data-no-chrome] .nav-dots,
+body[data-no-chrome] .keyboard-hint,
+body[data-no-chrome] .chassis-credit,
+body[data-no-chrome] .chassis-cursor,
+body[data-no-chrome] .artifact-editor-toggle { display: none; }
+
+:fullscreen .keyboard-hint,
+:fullscreen .chassis-credit,
+:fullscreen .artifact-editor-toggle { display: none; }
+
+@media (hover: none) {
+    .keyboard-hint,
+    .chassis-credit { display: none; }
+}
+
+@media (max-width: 900px), (max-height: 560px) {
+    .nav-dots,
+    .keyboard-hint,
+    .chassis-credit,
+    .chassis-cursor { display: none; }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.2s !important;
+    }
+    html { scroll-behavior: auto; }
+}
+
+/* ---------- Print (PDF export) ---------- */
+@media print {
+    .nav-dots, .keyboard-hint, .chassis-credit, .chassis-cursor { display: none !important; }
+    html, body { height: auto; overflow: visible; }
+    html { scroll-snap-type: none; }
+    .slide-viewport {
+        page-break-after: always;
+        break-after: page;
+        height: 100vh;
+    }
+    .slide-scale {
+        position: static !important;
+        transform: none !important;
+        width: 100% !important;
+        height: auto !important;
+    }
+    .slide {
+        width: 100% !important;
+        height: auto !important;
+    }
+}
+
+</style>
+<script>
+/* =====================================================
+   PRESENTATION CHASSIS — slide controller
+   Auto-initializes on DOMContentLoaded.
+   Exposes window.slides for programmatic control.
+   ===================================================== */
+(function () {
+    'use strict';
+
+    const REVEAL_SELECTOR = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-blur';
+    const STEP_SELECTOR = '.step';
+    const ALL_REVEAL_SELECTOR = REVEAL_SELECTOR + ', ' + STEP_SELECTOR;
+    const VIEWPORT_CLASS = 'slide-viewport';
+    const SCALE_CLASS = 'slide-scale';
+
+    function _detectLang() {
+        const param = new URLSearchParams(location.search).get('lang');
+        return (param || navigator.language || 'en').slice(0, 2).toLowerCase();
+    }
+
+    class SlidePresentation {
+        constructor() {
+            this.slides = Array.from(document.querySelectorAll('.slide'));
+            if (this.slides.length === 0) return;
+
+            // Ensure every slide has an id so hashes + anchor links work.
+            // Author-defined ids are preserved; the rest get slide-N (1-indexed).
+            this.slides.forEach((slide, idx) => {
+                if (!slide.id) slide.id = `slide-${idx + 1}`;
+            });
+            this.viewports = this._setupViewports();
+            this.scales = this.viewports.map((viewport) => viewport.querySelector(`.${SCALE_CLASS}`));
+
+            // Hide every reveal element BEFORE lifting the CSS FOUC guard.
+            // After this, .reveals-ready is on <html>, so CSS no longer hides
+            // reveals — inline styles keep them hidden until JS animates them.
+            this._setupReveals();
+
+            this.navDotsContainer = this._ensureNavDots();
+            this.keyboardHint = this._ensureKeyboardHint();
+            this.credit = this._ensureCredit();
+
+            this._setupCanvasScale();
+            this._setupIntersectionObserver();
+            this._setupKeyboardNav();
+            this._setupWheelNav();
+            this._setupTouchNav();
+            this._setupViewportSync();
+            this._buildNavDots();
+            this._setupHashNav();
+            this._setupCursor();
+            this._setupPrintSettling();
+
+            // If URL has a matching hash, start there; otherwise start at slide 0.
+            const initial = this._slideIndexFromHash(location.hash);
+            this.currentSlide = initial >= 0 ? initial : 0;
+            if (this.currentSlide !== 0) {
+                this._scrollToSlide(this.currentSlide, 'auto');
+            }
+            // Reveal initial slide immediately (observer may miss it on load).
+            const first = this.slides[this.currentSlide];
+            first.classList.add('visible');
+            this._playSlideReveals(first);
+            this._updateNavDots();
+        }
+
+        /* ---------- Viewport scaffolding ----------
+           Authors write .slide as the 1920×1080 artboard. The chassis wraps
+           that authored section in viewport and scale layers. */
+        _setupViewports() {
+            return this.slides.map((slide) => {
+                const existingScale = slide.parentElement?.classList.contains(SCALE_CLASS)
+                    ? slide.parentElement
+                    : null;
+                const existingViewport = existingScale?.parentElement?.classList.contains(VIEWPORT_CLASS)
+                    ? existingScale.parentElement
+                    : null;
+                if (existingViewport) {
+                    this._syncViewportBackground(slide, existingViewport);
+                    return existingViewport;
+                }
+
+                const viewport = document.createElement('div');
+                viewport.className = VIEWPORT_CLASS;
+                const scale = document.createElement('div');
+                scale.className = SCALE_CLASS;
+
+                slide.parentNode.insertBefore(viewport, slide);
+                viewport.appendChild(scale);
+                scale.appendChild(slide);
+                this._syncViewportBackground(slide, viewport);
+
+                return viewport;
+            });
+        }
+
+        _syncViewportBackground(slide, viewport) {
+            const style = getComputedStyle(slide);
+            const hasBackgroundImage = style.backgroundImage && style.backgroundImage !== 'none';
+            const hasBackgroundColor = !['rgba(0, 0, 0, 0)', 'transparent'].includes(style.backgroundColor);
+            if (hasBackgroundImage || hasBackgroundColor) {
+                viewport.style.background = style.background;
+            } else {
+                viewport.style.background = '';
+            }
+            slide.style.background = 'transparent';
+        }
+
+        /* ---------- DOM scaffolding (auto-inserted if missing) ---------- */
+        _ensureNavDots() {
+            let el = document.getElementById('navDots');
+            if (!el) {
+                el = document.createElement('nav');
+                el.id = 'navDots';
+                el.className = 'nav-dots';
+                el.setAttribute('aria-label', 'Slide navigation');
+                document.body.appendChild(el);
+            }
+            return el;
+        }
+
+        _ensureKeyboardHint() {
+            let el = document.querySelector('.keyboard-hint');
+            if (!el) {
+                const i18n = {
+                    en: { navigate: 'navigate', restart: 'restart', fullscreen: 'fullscreen' },
+                    es: { navigate: 'navegar',   restart: 'inicio',   fullscreen: 'fullscreen' },
+                    fr: { navigate: 'naviguer',  restart: 'début',    fullscreen: 'fullscreen' },
+                    de: { navigate: 'blättern',  restart: 'anfang',   fullscreen: 'vollbild' },
+                    pt: { navigate: 'navegar',   restart: 'início',   fullscreen: 'fullscreen' },
+                    ja: { navigate: '移動',      restart: '先頭',      fullscreen: '全画面' },
+                    ko: { navigate: '이동',      restart: '처음',      fullscreen: '전체화면' },
+                    zh: { navigate: '翻页',      restart: '重置',      fullscreen: '全屏' },
+                    it: { navigate: 'navigare',  restart: 'inizio',   fullscreen: 'fullscreen' },
+                    nl: { navigate: 'bladeren',  restart: 'begin',    fullscreen: 'vollscherm' },
+                };
+                const t = i18n[_detectLang()] || i18n.en;
+                el = document.createElement('div');
+                el.className = 'keyboard-hint';
+                el.innerHTML = `<kbd>←</kbd> <kbd>→</kbd> ${t.navigate} &middot; <kbd>R</kbd> ${t.restart} &middot; <kbd>F</kbd> ${t.fullscreen}`;
+                document.body.appendChild(el);
+            }
+            return el;
+        }
+
+        _ensureCredit() {
+            let el = document.querySelector('.chassis-credit');
+            if (!el) {
+                el = document.createElement('div');
+                el.className = 'chassis-credit';
+                el.setAttribute('aria-hidden', 'true');
+                el.innerHTML = 'Student Copy | Dave Bryan J. Beatingo';
+                document.body.appendChild(el);
+            }
+            return el;
+        }
+
+        /* ---------- Reveal engine ----------
+           Reveals are driven by the Web Animations API instead of CSS
+           transitions. This lets authors put .reveal* / .step on any
+           element: animation values live in the animation cascade origin
+           and win over normal author declarations, so no wrapper element
+           is required to isolate the chassis from author CSS.
+
+           State per slide:
+           - "hidden":  inline opacity/transform/filter from the 'from'
+                        keyframe of the variant. Set on init and on
+                        forward re-entry.
+           - "played":  animation is running or has run; the class
+                        `reveals-played` on the slide makes playback
+                        idempotent so observer re-fires (resize,
+                        fullscreen) don't restart the animation.
+           - "settled": animation canceled, inline styles cleared. Used
+                        for backward entries (we skip the animation and
+                        show the final state instantly) and for print. */
+
+        _setupReveals() {
+            // Lift the CSS FOUC guard first so getComputedStyle reads each
+            // element's natural opacity, not the guard's blanket opacity: 0.
+            // No paint occurs mid-task — inline hidden styles are applied
+            // before the browser yields, so there is no visible flash.
+            document.documentElement.classList.add('reveals-ready');
+            this.slides.forEach((slide) => {
+                slide.querySelectorAll(ALL_REVEAL_SELECTOR).forEach((el) => {
+                    el._targetOpacity = parseFloat(getComputedStyle(el).opacity);
+                    this._applyHiddenStyle(el);
+                });
+            });
+        }
+
+        _setupPrintSettling() {
+            // Browsers snapshot the document for print/PDF export. WAAPI
+            // animations don't necessarily complete in that snapshot, so
+            // settle every slide to its final state first. After printing,
+            // reset — but only for slides that haven't already been viewed,
+            // so the audience experience picks up where it left off.
+            window.addEventListener('beforeprint', () => {
+                this.slides.forEach((slide) => this._settleSlide(slide));
+            });
+        }
+
+        _readTokens() {
+            const cs = getComputedStyle(document.documentElement);
+            const rawDuration = parseFloat(cs.getPropertyValue('--reveal-duration'));
+            const duration = Number.isFinite(rawDuration) ? rawDuration * 1000 : 800;
+            const ease = cs.getPropertyValue('--reveal-ease').trim() || 'cubic-bezier(0.16, 1, 0.3, 1)';
+            const distance = cs.getPropertyValue('--reveal-distance').trim() || '28px';
+            const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            return {
+                duration: reducedMotion ? 1 : duration,
+                ease,
+                distance,
+            };
+        }
+
+        _getRevealDelay(el) {
+            // Use getAttribute('class') rather than el.className: on SVG
+            // elements, `.className` is an SVGAnimatedString (not a string)
+            // and calling .match on it throws. getAttribute is uniform
+            // across HTML and SVG.
+            const classes = el.getAttribute('class') || '';
+            const m = classes.match(/\bd([1-8])\b/);
+            if (!m) return 0;
+            // Matches CSS .dN: d1 = 100ms, d2 = 250ms, +150ms per step.
+            return 100 + (parseInt(m[1], 10) - 1) * 150;
+        }
+
+        _getRevealKeyframes(el, distance) {
+            const to = el._targetOpacity ?? 1;
+            if (el.classList.contains('reveal-left')) {
+                return [
+                    { opacity: 0, transform: `translateX(calc(-1 * ${distance}))` },
+                    { opacity: to, transform: 'translateX(0)' },
+                ];
+            }
+            if (el.classList.contains('reveal-right')) {
+                return [
+                    { opacity: 0, transform: `translateX(${distance})` },
+                    { opacity: to, transform: 'translateX(0)' },
+                ];
+            }
+            if (el.classList.contains('reveal-scale')) {
+                return [
+                    { opacity: 0, transform: 'scale(0.88)' },
+                    { opacity: to, transform: 'scale(1)' },
+                ];
+            }
+            if (el.classList.contains('reveal-blur')) {
+                return [
+                    { opacity: 0, filter: 'blur(10px)' },
+                    { opacity: to, filter: 'blur(0)' },
+                ];
+            }
+            // Default: .reveal or .step (slide up + fade)
+            return [
+                { opacity: 0, transform: `translateY(${distance})` },
+                { opacity: to, transform: 'translateY(0)' },
+            ];
+        }
+
+        _applyHiddenStyle(el) {
+            const { distance } = this._readTokens();
+            const from = this._getRevealKeyframes(el, distance)[0];
+            if ('opacity' in from) el.style.opacity = from.opacity;
+            if ('transform' in from) el.style.transform = from.transform;
+            if ('filter' in from) el.style.filter = from.filter;
+        }
+
+        _clearHiddenStyle(el) {
+            el.style.opacity = '';
+            el.style.transform = '';
+            el.style.filter = '';
+        }
+
+        _cancelReveal(el) {
+            if (el._revealAnim) {
+                el._revealAnim.cancel();
+                el._revealAnim = null;
+            }
+        }
+
+        _playReveal(el, delayOverride) {
+            this._cancelReveal(el);
+            const { duration, ease, distance } = this._readTokens();
+            const delay = typeof delayOverride === 'number' ? delayOverride : this._getRevealDelay(el);
+            const keyframes = this._getRevealKeyframes(el, distance);
+            // fill: 'backwards' applies the 'from' keyframe during the
+            // stagger delay so the element stays hidden until its turn,
+            // without pinning the 'to' keyframe after the animation ends.
+            // This lets co-existing author CSS (e.g. a `.pulse` CSS
+            // animation on the same element) take over naturally once the
+            // entrance completes — otherwise our fill would mask anything
+            // the author wanted to happen post-reveal.
+            const anim = el.animate(keyframes, {
+                duration,
+                delay,
+                easing: ease,
+                fill: 'backwards',
+            });
+            el._revealAnim = anim;
+            // Safe to clear inline 'from' styles now — the animation's
+            // backwards-fill holds the element at the 'from' keyframe for
+            // the duration of any stagger delay.
+            this._clearHiddenStyle(el);
+        }
+
+        _playSlideReveals(slide) {
+            if (slide.classList.contains('reveals-played')) return;
+            slide.classList.add('reveals-played');
+            slide.querySelectorAll(REVEAL_SELECTOR).forEach((el) => this._playReveal(el));
+            // .step elements stay hidden until the user advances.
+        }
+
+        _resetSlideReveals(slide) {
+            // Forward re-entry: cancel in-flight animations, re-hide
+            // everything, and reset step state so the slide replays cleanly
+            // when the observer next adds .visible.
+            slide.classList.remove('reveals-played');
+            slide.querySelectorAll(ALL_REVEAL_SELECTOR).forEach((el) => {
+                this._cancelReveal(el);
+                this._applyHiddenStyle(el);
+            });
+            slide.querySelectorAll('.step.step-shown').forEach((el) => el.classList.remove('step-shown'));
+        }
+
+        _settleSlide(slide) {
+            // Print / PDF export: jump to the final state with everything
+            // shown, so every step appears in the exported document.
+            slide.classList.add('reveals-played');
+            slide.querySelectorAll(ALL_REVEAL_SELECTOR).forEach((el) => {
+                this._cancelReveal(el);
+                this._clearHiddenStyle(el);
+            });
+            slide.querySelectorAll('.step').forEach((el) => el.classList.add('step-shown'));
+        }
+
+        _rewindSlide(slide) {
+            // Backward re-entry: show reveals instantly (no replay — the
+            // viewer already saw the intro) but hide every step, so the
+            // slide is positioned at the start of its stepped content and
+            // can be stepped through again.
+            slide.classList.add('reveals-played');
+            slide.querySelectorAll(REVEAL_SELECTOR).forEach((el) => {
+                this._cancelReveal(el);
+                this._clearHiddenStyle(el);
+            });
+            slide.querySelectorAll('.step').forEach((el) => {
+                el.classList.remove('step-shown');
+                this._cancelReveal(el);
+                this._applyHiddenStyle(el);
+            });
+        }
+
+        /* ---------- Navigation ----------
+           goTo scrolls to the target. Both forward-replay and backward-
+           rewind need to mutate the target BEFORE scrolling — while it's
+           still offscreen — so the viewer never sees the old state flash
+           into view. Resetting after the slide is in view causes a visible
+           "show then hide" blink; the IntersectionObserver fires too late
+           (80% threshold) to catch it. */
+        goTo(index) {
+            const clamped = Math.max(0, Math.min(this.slides.length - 1, index));
+            if (clamped === this.currentSlide) return;
+
+            const target = this.slides[clamped];
+            const goingForward = clamped > this.currentSlide;
+
+            if (target.classList.contains('visible')) {
+                if (goingForward) {
+                    // Forward replay: full reset so the observer can play reveals fresh.
+                    target.classList.remove('visible');
+                    this._resetSlideReveals(target);
+                } else {
+                    // Backward rewind: hide any shown steps so the slide
+                    // scrolls back in at the start of its stepped content.
+                    this._rewindSlide(target);
+                }
+            }
+
+            this._scrollToSlide(clamped, 'smooth');
+        }
+
+        _scrollToSlide(index, behavior) {
+            this.viewports[index]?.scrollIntoView({ behavior, block: 'start' });
+        }
+
+        _slideIndexFromHash(hash) {
+            if (!hash) return -1;
+            return this.slides.findIndex((s) => '#' + s.id === hash);
+        }
+
+        _syncHash() {
+            const slide = this.slides[this.currentSlide];
+            if (!slide || !slide.id) return;
+            const newHash = '#' + slide.id;
+            if (location.hash !== newHash) {
+                // replaceState — keeps the URL in sync without polluting history,
+                // so the browser back button exits the deck instead of stepping through slides.
+                try {
+                    history.replaceState(null, '', newHash);
+                } catch {
+                    // Sandboxed iframes (opaque origin, about:srcdoc) reject URL
+                    // mutation with a SecurityError. Hash sync is a nicety — an
+                    // unguarded throw here kills the observer callback before it
+                    // marks the slide visible and plays its reveals.
+                }
+            }
+        }
+
+        _setupHashNav() {
+            // React to external hash changes (anchor link clicks, back/forward if user uses pushState manually)
+            window.addEventListener('hashchange', () => {
+                const idx = this._slideIndexFromHash(location.hash);
+                if (idx >= 0 && idx !== this.currentSlide) this.goTo(idx);
+            });
+        }
+
+        /* ---------- Custom cursor ----------
+           Accent disc that follows the pointer, hidden after idle. */
+        _setupCursor() {
+            if (!matchMedia('(hover: hover)').matches) return;
+
+            const cursor = document.createElement('div');
+            cursor.className = 'chassis-cursor';
+            cursor.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(cursor);
+            document.body.classList.add('chassis-cursor-active');
+
+            const half = 16;  // matches width/height / 2 in CSS
+            const IDLE_MS = 2500;
+            let idleTimer = null;
+
+            const show = () => {
+                cursor.classList.add('visible');
+                clearTimeout(idleTimer);
+                idleTimer = setTimeout(() => {
+                    cursor.classList.remove('visible');
+                }, IDLE_MS);
+            };
+            const hide = () => {
+                clearTimeout(idleTimer);
+                cursor.classList.remove('visible');
+            };
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.transform = `translate3d(${e.clientX - half}px, ${e.clientY - half}px, 0)`;
+                show();
+            });
+            document.addEventListener('mouseleave', hide);
+            document.addEventListener('mouseenter', show);
+        }
+
+        /* ---------- Fullscreen ---------- */
+        toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen?.().catch(() => {});
+            } else {
+                document.exitFullscreen?.();
+            }
+        }
+
+        next() { this.goTo(this.currentSlide + 1); }
+        prev() { this.goTo(this.currentSlide - 1); }
+        first() { this.goTo(0); }
+        last() { this.goTo(this.slides.length - 1); }
+
+        /* ---------- Step-aware advance / retreat ----------
+           advance() reveals the next .step on the current slide (if any),
+           otherwise advances to the next slide. retreat() hides the last
+           revealed step, otherwise goes back to the previous slide. */
+        advance() {
+            const current = this.slides[this.currentSlide];
+            const nextStep = current?.querySelector('.step:not(.step-shown)');
+            if (nextStep) {
+                nextStep.classList.add('step-shown');
+                // No stagger on click-reveal — the user's gesture is the trigger.
+                this._playReveal(nextStep, 0);
+                return;
+            }
+            this.next();
+        }
+        retreat() {
+            const current = this.slides[this.currentSlide];
+            const shown = current?.querySelectorAll('.step.step-shown');
+            if (shown && shown.length > 0) {
+                const last = shown[shown.length - 1];
+                last.classList.remove('step-shown');
+                this._cancelReveal(last);
+                this._applyHiddenStyle(last);
+                return;
+            }
+            this.prev();
+        }
+
+        /* ---------- Intersection observer ----------
+           Fire late (>= 80% in view) so reveals play on a settled slide.
+           This is the single source of truth for active-slide state.
+
+           Forward:  add .visible, play reveals. (goTo() has already reset
+                     the target to pre-reveal state if this is a re-visit,
+                     so the animation is fresh either way.)
+           Backward: add .visible, rewind to the start of the stepped
+                     content — reveals are shown instantly (no replay) and
+                     every step is hidden again so the viewer can step
+                     through it fresh. */
+        _setupIntersectionObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting) return;
+                    const idx = this.viewports.indexOf(entry.target);
+                    if (idx < 0) return;
+                    const slide = this.slides[idx];
+
+                    if (idx === this.currentSlide) {
+                        // Same-slide re-fire (initial load, resize, fullscreen).
+                        if (!slide.classList.contains('visible')) {
+                            slide.classList.add('visible');
+                        }
+                        // Idempotent: only plays if not already marked played.
+                        this._playSlideReveals(slide);
+                        return;
+                    }
+
+                    const goingForward = idx > this.currentSlide;
+                    this.currentSlide = idx;
+                    this._updateNavDots();
+                    this._syncHash();
+
+                    slide.classList.add('visible');
+                    if (goingForward) {
+                        this._playSlideReveals(slide);
+                    } else {
+                        this._rewindSlide(slide);
+                    }
+                });
+            }, { threshold: 0.8 });
+
+            this.viewports.forEach((viewport) => observer.observe(viewport));
+        }
+
+        /* ---------- Keyboard ---------- */
+        _setupKeyboardNav() {
+            document.addEventListener('keydown', (e) => {
+                // Skip when user is editing text
+                if (e.target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+
+                switch (e.key) {
+                    // Step-aware: consume steps first, then advance slides
+                    case 'ArrowDown':
+                    case 'ArrowRight':
+                    case ' ':
+                        e.preventDefault(); this.advance(); break;
+                    case 'ArrowUp':
+                    case 'ArrowLeft':
+                        e.preventDefault(); this.retreat(); break;
+                    // Slide-level: always skip past steps
+                    case 'PageDown':
+                        e.preventDefault(); this.next(); break;
+                    case 'PageUp':
+                        e.preventDefault(); this.prev(); break;
+                    case 'Home':
+                        e.preventDefault(); this.first(); break;
+                    case 'End':
+                        e.preventDefault(); this.last(); break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault(); this.toggleFullscreen(); break;
+                    case 'r':
+                    case 'R':
+                        e.preventDefault(); this.first(); break;
+                }
+            });
+        }
+
+        /* ---------- Wheel / trackpad ----------
+           ALWAYS preventDefault — letting any native wheel scroll through
+           races against scrollIntoView + mandatory snap, and blocks macOS
+           two-finger horizontal swipes from triggering browser back/forward.
+           Whichever axis has the larger magnitude wins, so vertical scroll
+           and horizontal trackpad swipes both drive advance/retreat. Lock
+           briefly after a gesture so trackpad inertia (continuous small
+           deltas) can't spam next(). */
+        _setupWheelNav() {
+            let locked = false;
+            window.addEventListener('wheel', (e) => {
+                if (e.ctrlKey) return;                // preserve browser pinch-zoom (ctrl+wheel)
+                e.preventDefault();                   // block native scroll + horizontal back-swipe
+                if (locked) return;
+                const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+                if (Math.abs(delta) < 20) return;     // ignore tiny flicks
+                locked = true;
+                if (delta > 0) this.advance(); else this.retreat();
+                setTimeout(() => { locked = false; }, 500);
+            }, { passive: false });
+        }
+
+        /* ---------- Touch / swipe ----------
+           Horizontal swipes advance / retreat slides; left = next, right =
+           prev (matches stories / carousel conventions). Dominantly
+           vertical swipes fall through to native scroll-snap so the
+           existing top/bottom behavior keeps working. A time budget
+           rejects slow pans that were really aborted scrolls. */
+        _setupTouchNav() {
+            const MIN_DISTANCE = 50;     // px — below this is a tap or jitter
+            const MAX_TIME = 600;        // ms — slower than this is a pan, not a swipe
+            const DOMINANCE = 1.2;       // horizontal must beat vertical by this factor
+
+            let startX = 0, startY = 0, startTime = 0;
+            let tracking = false;
+
+            window.addEventListener('touchstart', (e) => {
+                if (document.body.classList.contains('artifact-editor-editing')) { tracking = false; return; }
+                if (e.touches.length !== 1) { tracking = false; return; }
+                const t = e.touches[0];
+                startX = t.clientX;
+                startY = t.clientY;
+                startTime = performance.now();
+                tracking = true;
+            }, { passive: true });
+
+            window.addEventListener('touchend', (e) => {
+                if (!tracking) return;
+                tracking = false;
+                const t = e.changedTouches[0];
+                const dx = t.clientX - startX;
+                const dy = t.clientY - startY;
+                const ax = Math.abs(dx), ay = Math.abs(dy);
+                if (ax < MIN_DISTANCE) return;
+                if (ax < ay * DOMINANCE) return;
+                if (performance.now() - startTime > MAX_TIME) return;
+                if (dx < 0) this.advance(); else this.retreat();
+            }, { passive: true });
+
+            window.addEventListener('touchcancel', () => { tracking = false; }, { passive: true });
+        }
+
+        /* ---------- Canvas scaling ----------
+           Each scaler holds a fixed 1920×1080 slide. Compute the
+           scale factor that fits it inside the viewport and apply via
+           CSS custom property. Runs on init, resize, and fullscreen. */
+        _setupCanvasScale() {
+            const CANVAS_W = 1920;
+            const CANVAS_H = 1080;
+            const scales = this.scales;
+
+            const update = () => {
+                const scale = Math.min(
+                    window.innerWidth / CANVAS_W,
+                    window.innerHeight / CANVAS_H
+                );
+                scales.forEach((el) => {
+                    el?.style.setProperty('--slide-scale', scale);
+                });
+            };
+
+            update();
+            window.addEventListener('resize', update);
+            document.addEventListener('fullscreenchange', () => {
+                requestAnimationFrame(update);
+            });
+        }
+
+        /* ---------- Viewport sync ----------
+           Resize / fullscreenchange → realign current slide. Each slide is
+           100vh, so a viewport height change leaves the existing scroll
+           position out of alignment with the slide top; scroll-snap doesn't
+           re-snap on its own. */
+        _setupViewportSync() {
+            const realign = () => {
+                requestAnimationFrame(() => {
+                    this._scrollToSlide(this.currentSlide, 'auto');
+                });
+            };
+            window.addEventListener('resize', realign);
+            document.addEventListener('fullscreenchange', realign);
+        }
+
+        /* ---------- Nav dots ---------- */
+        _buildNavDots() {
+            // Clear first — prevents duplicates when DOM is re-serialized/re-opened
+            this.navDotsContainer.innerHTML = '';
+            this.slides.forEach((slide, idx) => {
+                const dot = document.createElement('button');
+                dot.setAttribute('aria-label', `Go to slide ${idx + 1}`);
+                if (idx === 0) dot.classList.add('active');
+                dot.addEventListener('click', () => this.goTo(idx));
+                this.navDotsContainer.appendChild(dot);
+            });
+        }
+
+        _updateNavDots() {
+            const dots = this.navDotsContainer.querySelectorAll('button');
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === this.currentSlide);
+            });
+        }
+    }
+
+    /* ---------- Auto-init ---------- */
+    function init() {
+        // Each slide canvas is its own editable host for the inline editor.
+        document.querySelectorAll('.slide').forEach(function (el) {
+            el.classList.add('artifact-editable');
+        });
+        window.slides = new SlidePresentation();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+
+</script>
+<!-- /skill:chassis -->
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" name="viewport"/>
+<title>Lesson 13 – Big O Without Fear - Student Copy</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&amp;family=Space+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root {
+      --background: #fafafa;
+      --foreground: #1a1a1a;
+      --accent: #FF5722;
+      --accent-foreground: #ffffff;
+      --card: #FF5722;
+      --card-foreground: #ffffff;
+      --code-bg: #1e1e2e;
+      --code-fg: #cdd6f4;
+      --font-display: 'Archivo Black', sans-serif;
+      --font-body: 'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    html, body { margin: 0; padding: 0; }
+    .slide {
+      padding: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      font-family: var(--font-body);
+      color: var(--foreground);
+      background: var(--background);
+      position: relative;
+      overflow: hidden;
+    }
+    h1 { font-family: var(--font-display); font-size: 120px; line-height: 1.05; margin: 0; letter-spacing: -2px; }
+    h2 { font-family: var(--font-display); font-size: 64px; line-height: 1.1; margin: 0 0 40px 0; letter-spacing: -1px; }
+    h3 { font-family: var(--font-display); font-size: 44px; line-height: 1.2; margin: 0 0 30px 0; }
+    p, li { font-size: 36px; line-height: 1.45; color: color-mix(in srgb, var(--foreground) 75%, transparent); max-width: 800px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 12px 0; padding-left: 40px; position: relative; }
+    li::before { content: '→'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+    .eyebrow { font-family: var(--font-mono); font-size: 24px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; display: block; }
+    .section-number { font-family: var(--font-display); font-size: 200px; color: color-mix(in srgb, var(--accent) 12%, transparent); position: absolute; top: 40px; right: 80px; line-height: 1; }
+    .card-accent {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: var(--accent);
+      border-radius: 32px;
+      right: -80px;
+      top: 50%;
+      transform: translateY(-50%) rotate(12deg);
+      opacity: 0.9;
+    }
+    .code-block {
+      background: var(--code-bg);
+      color: var(--code-fg);
+      font-family: var(--font-mono);
+      font-size: 30px;
+      line-height: 1.6;
+      padding: 40px 50px;
+      border-radius: 12px;
+      margin-top: 30px;
+      max-width: 1200px;
+      overflow: hidden;
+    }
+    .code-block .keyword { color: #cba6f7; }
+    .code-block .class-name { color: #f9e2af; }
+    .code-block .method { color: #89b4fa; }
+    .code-block .string { color: #a6e3a1; }
+    .code-block .comment { color: #6c7086; font-style: italic; }
+    .code-block .bracket { color: #f38ba8; }
+.code-block .op { color: #f38ba8; }
+
+    /* Syntax highlighting for Java code snippets */
+    .code-block .kw { color: #cba6f7; font-weight: 600; }
+    .code-block .type { color: #f9e2af; font-weight: 600; }
+    .code-block .fn { color: #89b4fa; }
+    .code-block .str { color: #a6e3a1; }
+    .code-block .comment { color: #6c7086; font-style: italic; }
+    .code-block .num { color: #fab387; }
+    .code-block .op { color: #f38ba8; }
+    .code-block .bracket { color: #f38ba8; }
+.code-block .op { color: #f38ba8; }
+    .highlight { color: var(--accent); font-weight: 700; }
+    .big-emoji { font-size: 100px; margin-bottom: 30px; }
+    .step-card {
+      background: color-mix(in srgb, var(--accent) 8%, var(--background));
+      border-left: 6px solid var(--accent);
+      padding: 30px 40px;
+      border-radius: 0 16px 16px 0;
+      margin: 15px 0;
+      max-width: 900px;
+    }
+    .step-card p { margin: 0; color: var(--foreground); }
+    .step-card .step-num { font-family: var(--font-display); font-size: 28px; color: var(--accent); margin-bottom: 8px; }
+    .error-block {
+      background: #fef2f2;
+      border-left: 6px solid #ef4444;
+      padding: 30px 40px;
+      border-radius: 0 16px 16px 0;
+      margin: 15px 0;
+      max-width: 1000px;
+    }
+    .error-block code { font-family: var(--font-mono); font-size: 28px; color: #dc2626; }
+    .success-block {
+      background: #f0fdf4;
+      border-left: 6px solid #22c55e;
+      padding: 30px 40px;
+      border-radius: 0 16px 16px 0;
+      margin: 15px 0;
+      max-width: 1000px;
+    }
+    .success-block code { font-family: var(--font-mono); font-size: 28px; color: #16a34a; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-top: 30px; }
+    .info-card {
+      background: color-mix(in srgb, var(--accent) 6%, var(--background));
+      border-radius: 16px;
+      padding: 35px;
+    }
+    .info-card h3 { font-size: 32px; margin-bottom: 12px; }
+    .info-card p { font-size: 28px; margin: 0; }
+    .slide-dark {
+      background: var(--foreground);
+      color: var(--background);
+    }
+    .slide-dark h2, .slide-dark h1 { color: var(--background); }
+    .slide-dark p, .slide-dark li { color: color-mix(in srgb, var(--background) 75%, transparent); }
+    .slide-dark .eyebrow { color: var(--accent); }
+    .slide-accent {
+      background: var(--accent);
+      color: var(--accent-foreground);
+    }
+    .slide-accent h1, .slide-accent h2 { color: var(--accent-foreground); }
+    .slide-accent p { color: color-mix(in srgb, var(--accent-foreground) 85%, transparent); max-width: 100%; }
+    .slide-accent .eyebrow { color: var(--accent-foreground); opacity: 0.7; }
+    .url-display {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      background: color-mix(in srgb, var(--accent) 10%, var(--background));
+      padding: 20px 30px;
+      border-radius: 12px;
+      margin-top: 20px;
+      display: inline-block;
+      color: var(--accent);
+      font-weight: 500;
+    }
+  </style>
+<style>
+    /* Lesson-specific additions */
+
+    :root { --nav-dot-size: 7px; }
+    .nav-dots { gap: 5px; }
+    .timeline { gap: 16px 30px; }
+    .timeline .task { padding: 15px 24px; }
+
+    .chassis-credit { display: none !important; }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 30px;
+      width: 100%;
+    }
+    .comparison-card {
+      min-height: 300px;
+      padding: 36px;
+      border-radius: 22px;
+      background: color-mix(in srgb, var(--accent) 7%, var(--background));
+      border: 2px solid color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    .comparison-card .icon {
+      font-size: 76px;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+    .comparison-card h3 {
+      font-size: 34px;
+      margin-bottom: 14px;
+    }
+    .comparison-card p {
+      font-size: 27px;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    .analogy-flow {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 35px;
+      width: 100%;
+    }
+    .analogy-item {
+      flex: 1;
+      min-height: 280px;
+      padding: 34px;
+      border-radius: 22px;
+      background: color-mix(in srgb, var(--accent) 8%, var(--background));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .analogy-item .emoji { font-size: 74px; margin-bottom: 18px; }
+    .analogy-item strong { font-size: 34px; color: var(--foreground); }
+    .analogy-item span { font-size: 26px; margin-top: 12px; color: color-mix(in srgb, var(--foreground) 68%, transparent); }
+    .flow-arrow {
+      align-self: center;
+      font-family: var(--font-display);
+      font-size: 58px;
+      color: var(--accent);
+    }
+
+    .question-card {
+      width: 100%;
+      max-width: 1300px;
+      padding: 42px 48px;
+      border-radius: 22px;
+      border: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+      background: color-mix(in srgb, var(--accent) 6%, var(--background));
+      font-size: 38px;
+      line-height: 1.35;
+    }
+    .answer-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin: 10px 10px 0 0;
+      padding: 14px 22px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 12%, var(--background));
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      font-size: 27px;
+      font-weight: 600;
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 24px 30px;
+      width: 100%;
+      max-width: 1250px;
+      margin-top: 25px;
+      align-items: center;
+    }
+    .timeline .time {
+      font-family: var(--font-mono);
+      font-size: 27px;
+      font-weight: 700;
+      color: var(--accent);
+      text-align: right;
+    }
+    .timeline .task {
+      font-size: 30px;
+      padding: 20px 26px;
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--accent) 6%, var(--background));
+      border-left: 5px solid var(--accent);
+    }
+
+    .diagram-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      width: 100%;
+      margin-top: 30px;
+    }
+    .diagram-box {
+      min-width: 280px;
+      padding: 34px 28px;
+      text-align: center;
+      border-radius: 18px;
+      background: var(--foreground);
+      color: var(--background);
+      font-size: 30px;
+      font-weight: 700;
+    }
+    .diagram-arrow {
+      font-family: var(--font-display);
+      color: var(--accent);
+      font-size: 56px;
+    }
+
+    .output-block {
+      font-family: var(--font-mono);
+      font-size: 31px;
+      line-height: 1.55;
+      padding: 30px 38px;
+      border-radius: 16px;
+      margin-top: 24px;
+      width: 100%;
+      max-width: 1100px;
+      background: #111827;
+      color: #d1fae5;
+      border: 2px solid #22c55e;
+    }
+
+    .two-column-code {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 35px;
+      width: 100%;
+      align-items: start;
+    }
+    .two-column-code .code-block {
+      margin-top: 0;
+      max-width: none;
+      font-size: 27px;
+    }
+    .two-column-code .side-note {
+      border-radius: 18px;
+      padding: 34px;
+      background: color-mix(in srgb, var(--accent) 7%, var(--background));
+    }
+    .two-column-code .side-note h3 { font-size: 32px; margin-bottom: 18px; }
+    .two-column-code .side-note p { font-size: 27px; margin: 0; }
+
+    .mini-check {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 26px;
+      width: 100%;
+      margin-top: 28px;
+    }
+    .mini-check > div {
+      padding: 30px 34px;
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--accent) 7%, var(--background));
+      font-size: 29px;
+      line-height: 1.35;
+    }
+
+    .deck-controls {
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 120;
+      padding: 8px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--background) 88%, transparent);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 35px rgba(0,0,0,.12);
+      backdrop-filter: blur(12px);
+    }
+    .deck-controls button {
+      border: 0;
+      border-radius: 999px;
+      background: var(--foreground);
+      color: var(--background);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+    .deck-controls button:last-of-type {
+      background: var(--accent);
+      color: var(--accent-foreground);
+    }
+    .deck-controls .deck-count {
+      min-width: 70px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--foreground);
+    }
+    @media (min-width: 901px) and (min-height: 561px) {
+      .deck-controls { opacity: .28; transition: opacity .25s ease; }
+      .deck-controls:hover, .deck-controls:focus-within { opacity: 1; }
+    }
+    @media (max-width: 900px), (max-height: 560px) {
+      .deck-controls {
+        bottom: 8px;
+        width: calc(100vw - 16px);
+        justify-content: space-between;
+        background: rgba(255,255,255,.95);
+      }
+      .deck-controls button { font-size: 14px; padding: 10px 14px; }
+    }
+    @media print {
+      .deck-controls { display: none !important; }
+    }
+  
+
+/* Code snippet readability patch: syntax colors + no clipping */
+.code-block {
+  white-space: pre-wrap !important;
+  overflow: visible !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  max-width: calc(100% - 20px) !important;
+  max-height: none !important;
+}
+.code-block.code-small {
+  font-size: 24px !important;
+  line-height: 1.42 !important;
+  padding: 30px 38px !important;
+}
+.code-block.code-tiny {
+  font-size: 21px !important;
+  line-height: 1.34 !important;
+  padding: 24px 30px !important;
+}
+.code-block .keyword { color: #cba6f7; }
+.code-block .class-name { color: #f9e2af; }
+.code-block .method { color: #89b4fa; }
+.code-block .string { color: #a6e3a1; }
+.code-block .num { color: #fab387; }
+.code-block .comment { color: #6c7086; font-style: italic; }
+.code-block .bracket { color: #f38ba8; }
+.code-block .op { color: #f38ba8; }
+</style>
+
+<style id="dsa-mobile-responsive-controls-style">
+/* Mobile presentation support: preserve animations, expose step controls, and allow zoom/pan. */
+.slide-viewport,
+.slide {
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+}
+
+.dsa-mobile-controls {
+    position: fixed;
+    left: auto;
+    right: max(2px, env(safe-area-inset-right));
+    bottom: max(2px, env(safe-area-inset-bottom));
+    z-index: 2147483000;
+    display: none;
+    width: min(224px, calc(100vw - 4px));
+    padding: 3px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 8px;
+    background: rgba(7, 12, 24, .91);
+    box-shadow: 0 6px 18px rgba(0,0,0,.34);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #f8fafc;
+    transform: none;
+    font: 700 7.5px/1 var(--font-body, system-ui, sans-serif);
+    user-select: none;
+}
+.dsa-mobile-controls__row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 2px;
+}
+.dsa-mobile-controls__row + .dsa-mobile-controls__row { margin-top: 2px; }
+.dsa-mobile-controls__row--tools {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.dsa-mobile-controls button {
+    min-width: 0;
+    min-height: 21px;
+    padding: 0 2px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 5px;
+    background: rgba(255,255,255,.09);
+    color: #fff;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    white-space: nowrap;
+}
+.dsa-mobile-controls button:hover,
+.dsa-mobile-controls button:focus-visible {
+    background: var(--accent, #f97316);
+    border-color: var(--accent, #f97316);
+    outline: none;
+}
+.dsa-mobile-controls button[data-action="reveal-step"] {
+    background: color-mix(in srgb, var(--accent, #f97316) 72%, #111827);
+    border-color: color-mix(in srgb, var(--accent, #f97316) 85%, white 15%);
+}
+.dsa-mobile-controls button:disabled { opacity: .38; cursor: not-allowed; }
+.dsa-mobile-controls__count,
+.dsa-mobile-controls__steps {
+    min-width: 30px;
+    padding: 0 1px;
+    color: #dbeafe;
+    text-align: center;
+    white-space: nowrap;
+}
+.dsa-mobile-controls__steps { font-size: 6.5px; }
+
+/* Added only to text elements whose computed color has poor contrast. */
+.dsa-force-dark-text { color: #0f172a !important; text-shadow: none !important; }
+.dsa-force-light-text { color: #f8fafc !important; text-shadow: none !important; }
+
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+    html { scroll-snap-type: y proximity !important; }
+    body { overscroll-behavior-x: none; }
+    .deck-controls { display: none !important; }
+    .keyboard-hint, .nav-dots { display: none !important; }
+    .dsa-mobile-controls { display: block !important; }
+
+    .slide-viewport {
+        height: 100vh !important;
+        height: 100dvh !important;
+        overflow: auto !important;
+        touch-action: pan-x pan-y pinch-zoom !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in srgb, var(--accent, #f97316) 65%, transparent) transparent;
+    }
+    .slide-viewport::-webkit-scrollbar { display: block; width: 5px; height: 5px; }
+    .slide-viewport::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--accent, #f97316) 65%, transparent);
+        border-radius: 999px;
+    }
+    .slide-scale {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: var(--dsa-mobile-width, 864px) !important;
+        height: var(--dsa-mobile-height, 486px) !important;
+        margin: var(--dsa-mobile-margin, 16px) auto 66px !important;
+        transform: none !important;
+        transform-origin: top left !important;
+    }
+    .slide {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: scale(var(--dsa-mobile-scale, .45)) !important;
+        transform-origin: top left !important;
+    }
+}
+
+@media (max-width: 390px) {
+    .dsa-mobile-controls {
+        right: max(2px, env(safe-area-inset-right));
+        bottom: max(2px, env(safe-area-inset-bottom));
+        width: min(210px, calc(100vw - 4px));
+        padding: 2px;
+        border-radius: 7px;
+    }
+    .dsa-mobile-controls button { min-height: 19px; padding: 0 1px; font-size: 7px; }
+    .dsa-mobile-controls__count { min-width: 28px; }
+    .dsa-mobile-controls__steps { font-size: 6px; }
+}
+
+@media print {
+    .dsa-mobile-controls { display: none !important; }
+}
+</style>
+
+
+<style id="dsa-final-compact-controls-and-contrast">
+/* Final compact navigation: keep controls out of the lesson content. */
+.deck-controls {
+  left: auto !important;
+  right: max(6px, env(safe-area-inset-right)) !important;
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  transform: none !important;
+  width: auto !important;
+  max-width: min(230px, calc(100vw - 12px)) !important;
+  min-width: 0 !important;
+  justify-content: flex-end !important;
+  gap: 3px !important;
+  padding: 3px !important;
+  border-radius: 11px !important;
+  background: color-mix(in srgb, var(--background, #fff) 90%, transparent) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.20) !important;
+  opacity: .52 !important;
+  transition: opacity .2s ease, transform .2s ease !important;
+}
+.deck-controls:hover,
+.deck-controls:focus-within { opacity: 1 !important; }
+.deck-controls button {
+  min-width: 0 !important;
+  min-height: 25px !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+.deck-controls .deck-count {
+  min-width: 36px !important;
+  padding: 0 2px !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* The touch/animation panel stays compact and anchored at the bottom-right. */
+.dsa-mobile-controls {
+  left: auto !important;
+  right: max(3px, env(safe-area-inset-right)) !important;
+  bottom: max(3px, env(safe-area-inset-bottom)) !important;
+  width: min(178px, calc(100vw - 6px)) !important;
+  padding: 2px !important;
+  border-radius: 7px !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,.28) !important;
+  font-size: 6.5px !important;
+  opacity: .76 !important;
+}
+.dsa-mobile-controls:hover,
+.dsa-mobile-controls:focus-within { opacity: 1 !important; }
+.dsa-mobile-controls__row { gap: 1px !important; }
+.dsa-mobile-controls__row + .dsa-mobile-controls__row { margin-top: 1px !important; }
+.dsa-mobile-controls button {
+  min-height: 17px !important;
+  padding: 0 1px !important;
+  border-radius: 4px !important;
+  font-size: 6.5px !important;
+}
+.dsa-mobile-controls__count {
+  min-width: 25px !important;
+  padding: 0 !important;
+  font-size: 6.5px !important;
+}
+.dsa-mobile-controls__steps {
+  min-height: 7px !important;
+  padding-top: 1px !important;
+  font-size: 5.5px !important;
+  line-height: 1 !important;
+}
+
+/* Classes assigned by the contrast checker below. */
+.dsa-final-dark-text,
+.dsa-final-dark-text * { color: #111827 !important; text-shadow: none !important; }
+.dsa-final-light-text,
+.dsa-final-light-text * { color: #f8fafc !important; text-shadow: none !important; }
+
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+  /* The richer touch panel replaces the simple Previous/Next bar on mobile. */
+  .deck-controls { display: none !important; }
+  .slide-scale { margin-bottom: 50px !important; }
+}
+
+@media (max-width: 390px) {
+  .dsa-mobile-controls {
+    width: min(166px, calc(100vw - 6px)) !important;
+    right: max(3px, env(safe-area-inset-right)) !important;
+    bottom: max(3px, env(safe-area-inset-bottom)) !important;
+  }
+  .dsa-mobile-controls button { min-height: 16px !important; font-size: 6px !important; }
+  .dsa-mobile-controls__count { min-width: 23px !important; font-size: 6px !important; }
+}
+
+@media print {
+  .deck-controls, .dsa-mobile-controls { display: none !important; }
+}
+</style>
+
+
+<style id="dsa-uniform-presentation-size">
+/* Use one consistent fit-to-screen size across every lesson. */
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+  .slide-viewport {
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+  }
+  .slide-scale {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-bottom: 46px !important;
+  }
+}
+@media print {
+  .slide-scale { margin: 0 !important; }
+}
+</style>
+
+
+
+<style id="dsa-controls-match-presentation-one">
+/* Keep every presentation's navigation as compact as Presentation 1. */
+.deck-controls,
+.nav-buttons {
+  position: fixed !important;
+  left: auto !important;
+  right: max(6px, env(safe-area-inset-right)) !important;
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  width: auto !important;
+  max-width: min(172px, calc(100vw - 12px)) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 31px !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 2px !important;
+  box-sizing: border-box !important;
+  border-radius: 9px !important;
+  overflow: hidden !important;
+  opacity: .68 !important;
+  z-index: 2147483000 !important;
+}
+.deck-controls:hover,
+.deck-controls:focus-within,
+.nav-buttons:hover,
+.nav-buttons:focus-within { opacity: 1 !important; }
+.deck-controls > button,
+.deck-controls button,
+.nav-buttons > button,
+.nav-buttons button {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: 23px !important;
+  margin: 0 !important;
+  padding: 2px 6px !important;
+  border-radius: 7px !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+.deck-controls > span,
+.deck-controls .deck-count,
+.deck-controls #deckCounter,
+.deck-controls #deckCount,
+.nav-buttons > span,
+.nav-buttons #counter {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 31px !important;
+  max-width: 43px !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 1px !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+/* Keep the touch animation panel equally unobtrusive. */
+.dsa-mobile-controls {
+  left: auto !important;
+  right: max(4px, env(safe-area-inset-right)) !important;
+  bottom: max(4px, env(safe-area-inset-bottom)) !important;
+  width: min(158px, calc(100vw - 8px)) !important;
+  max-width: 158px !important;
+  padding: 2px !important;
+  border-radius: 7px !important;
+  opacity: .78 !important;
+}
+.dsa-mobile-controls__row { gap: 1px !important; }
+.dsa-mobile-controls__row + .dsa-mobile-controls__row { margin-top: 1px !important; }
+.dsa-mobile-controls button {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 15px !important;
+  padding: 0 2px !important;
+  border-radius: 4px !important;
+  font-size: 6px !important;
+  line-height: 1 !important;
+}
+.dsa-mobile-controls__count {
+  min-width: 22px !important;
+  font-size: 6px !important;
+  line-height: 1 !important;
+}
+.dsa-mobile-controls__steps {
+  min-height: 0 !important;
+  padding-top: 1px !important;
+  font-size: 5px !important;
+  line-height: 1 !important;
+}
+
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+  .deck-controls, .nav-buttons { display: none !important; }
+  .slide-scale { margin-bottom: 43px !important; }
+}
+@media print {
+  .deck-controls, .nav-buttons, .dsa-mobile-controls { display: none !important; }
+}
+</style>
+
+</head>
+<body>
+<section class="slide slide-dark">
+<span class="section-number" style="color: color-mix(in srgb, var(--accent) 25%, transparent);">13</span>
+<span class="eyebrow reveal d1">Module 2 · Lesson 13</span>
+<h1 class="reveal d2" style="font-size: 96px;">Big O<br/>Without Fear</h1>
+<p class="reveal d3" style="margin-top: 30px; max-width: 1200px;">A beginner-friendly way to describe how algorithm work grows when input becomes bigger.</p>
+</section>
+<section class="slide">
+<span class="section-number">01</span>
+<span class="eyebrow reveal d1">Warm-up</span>
+<h2 class="reveal d2">Before We Start</h2>
+<ul>
+<li class="step">What does linear search do?</li>
+<li class="step">What value do we return when the target is not found?</li>
+<li class="step">If the array has 100 items, how many items might linear search check?</li>
+</ul>
+</section>
+<section class="slide">
+<span class="section-number">02</span>
+<span class="eyebrow reveal d1">Today's Goals</span>
+<h2 class="reveal d2">What You'll Learn</h2>
+<ul>
+<li class="step">What Big O means in simple words</li>
+<li class="step">Why we do not only ask “How many seconds?”</li>
+<li class="step">The meaning of O(1), O(n), O(n²), and O(log n)</li>
+<li class="step">How to identify Big O from simple Java code</li>
+<li class="step">How Big O helps us compare algorithms</li>
+</ul>
+</section>
+<section class="slide">
+<span class="section-number">03</span>
+<span class="eyebrow reveal d1">Big Idea</span>
+<h2 class="reveal d2">Big O Talks About Growth</h2>
+<p class="reveal d3">Big O describes how the amount of work grows when the input becomes bigger.</p>
+<div class="quote-box reveal d4">Small input → small work<br/>Large input → how fast does the work grow?</div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Big O compares how the amount of work changes as the input size grows, allowing algorithms to be discussed independently of one computer speed.</p>
+</section>
+<section class="slide">
+<span class="section-number">04</span>
+<span class="eyebrow reveal d1">Simple Definition</span>
+<h2 class="reveal d2">Big O in One Sentence</h2>
+<div class="quote-box reveal d3">Big O is a way to describe the worst-case amount of work an algorithm may need as the input size grows.</div>
+<p class="reveal d4" style="margin-top: 28px;">Do not worry about formulas today. We will focus on patterns.</p>
+</section>
+<section class="slide">
+<span class="section-number">05</span>
+<span class="eyebrow reveal d1">Why It Matters</span>
+<h2 class="reveal d2">Two Programs Can Both Work</h2>
+<div class="comparison-grid reveal d3">
+<div class="comparison-card"><div class="icon">🐢</div><h3>Slow Growth</h3><p>Still okay when the input becomes large.</p></div>
+<div class="comparison-card"><div class="icon">🚀</div><h3>Fast Growth</h3><p>May become too slow when the input becomes large.</p></div>
+</div>
+<p class="reveal d4" style="margin-top: 28px;">Big O helps us choose better solutions.</p>
+</section>
+<section class="slide">
+<span class="section-number">06</span>
+<span class="eyebrow reveal d1">Analogy</span>
+<h2 class="reveal d2">Looking for a Book</h2>
+<p class="reveal d3">Imagine you are looking for one book in the library.</p>
+<div class="comparison-grid reveal d4">
+<div class="comparison-card"><div class="icon">📚</div><h3>One by One</h3><p>Check every book until you find it.</p></div>
+<div class="comparison-card"><div class="icon">🔤</div><h3>Alphabetical Shelf</h3><p>Use order to jump closer faster.</p></div>
+</div>
+</section>
+<section class="slide">
+<span class="section-number">07</span>
+<span class="eyebrow reveal d1">Important Word</span>
+<h2 class="reveal d2">Input Size = n</h2>
+<p class="reveal d3">In Big O, we often use the letter <span class="highlight">n</span>.</p>
+<div class="mini-check reveal d4"><div>If an array has 5 items, n = 5.</div><div>If an array has 100 items, n = 100.</div></div>
+<p class="reveal d5" style="margin-top: 28px;">n simply means “how many items we are working with.”</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">The symbol n represents the number of items the algorithm receives, such as the length of an array.</p>
+</section>
+<section class="slide">
+<span class="section-number">08</span>
+<span class="eyebrow reveal d1">Do Not Fear It</span>
+<h2 class="reveal d2">Big O Is Not Exact Time</h2>
+<ul>
+<li class="step">It does not usually mean seconds</li>
+<li class="step">It does not care much about computer brand or internet speed</li>
+<li class="step">It focuses on how the work grows</li>
+<li class="step">It gives us a simple way to compare algorithms</li>
+</ul>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Big O ignores exact milliseconds because hardware and language details vary; it focuses on the overall growth pattern.</p>
+</section>
+<section class="slide">
+<span class="section-number">09</span>
+<span class="eyebrow reveal d1">Preview</span>
+<h2 class="reveal d2">Four Big O Patterns Today</h2>
+<div class="comparison-grid reveal d3">
+<div class="comparison-card"><div class="icon">🎯</div><h3>O(1)</h3><p>Direct step</p></div>
+<div class="comparison-card"><div class="icon">🚶</div><h3>O(n)</h3><p>Check each item</p></div>
+<div class="comparison-card"><div class="icon">🧱</div><h3>O(n²)</h3><p>Loop inside loop</p></div>
+</div>
+<div class="mini-check reveal d4"><div><strong>O(log n)</strong> → repeatedly cut the search area in half.</div></div>
+</section>
+<section class="slide">
+<span class="section-number">10</span>
+<span class="eyebrow reveal d1">Pattern 1</span>
+<h2 class="reveal d2">O(1): One Direct Step</h2>
+<p class="reveal d3">O(1) means the work stays almost the same even when the input becomes bigger.</p>
+<div class="quote-box reveal d4">One direct access. One main action.</div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Constant-time work stays roughly the same even when the input contains many more items.</p>
+</section>
+<section class="slide">
+<span class="section-number">11</span>
+<span class="eyebrow reveal d1">Java Example</span>
+<h2 class="reveal d2">Array Direct Access</h2>
+<pre class="code-block code-small">int[] scores = {85, 90, 78, 92, 88};
+
+System.out.println(scores[0]);</pre><p class="reveal d4" style="margin-top: 28px;">This prints the first item directly. It does not scan the whole array.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Using a known array index reaches one position directly instead of checking earlier elements.</p>
+</section>
+<section class="slide">
+<span class="section-number">12</span>
+<span class="eyebrow reveal d1">Why O(1)?</span>
+<h2 class="reveal d2">The Array Index Is Direct</h2>
+<ul>
+<li class="step">scores[0] goes directly to index 0</li>
+<li class="step">If the array has 5 items, still one direct access</li>
+<li class="step">If the array has 5,000 items, still one direct access</li>
+<li class="step">That is why we call it constant time: O(1)</li>
+</ul>
+</section>
+<section class="slide">
+<span class="section-number">13</span>
+<span class="eyebrow reveal d1">Real-Life Analogy</span>
+<h2 class="reveal d2">Assigned Seat Number</h2>
+<p class="reveal d3">If your seat is number 12, you do not need to check every seat.</p>
+<div class="mini-check reveal d4"><div>You go directly to seat 12.</div><div>That feels like O(1).</div></div>
+</section>
+<section class="slide">
+<span class="section-number">14</span>
+<span class="eyebrow reveal d1">Understanding Check</span>
+<h2 class="reveal d2">Is This O(1)?</h2>
+<pre class="code-block">String name = students[3];</pre><div class="question-card reveal d4">Does this directly access one array position?</div>
+<div class="output-block step">Yes. This is O(1).</div>
+</section>
+<section class="slide">
+<span class="section-number">15</span>
+<span class="eyebrow reveal d1">Pattern 2</span>
+<h2 class="reveal d2">O(n): Check Every Item Once</h2>
+<p class="reveal d3">O(n) means the work grows as the number of items grows.</p>
+<div class="quote-box reveal d4">More items → more checks.</div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">A single full traversal performs work proportional to the number of elements.</p>
+</section>
+<section class="slide">
+<span class="section-number">16</span>
+<span class="eyebrow reveal d1">Java Example</span>
+<h2 class="reveal d2">Print Every Score</h2>
+<pre class="code-block code-small">int[] scores = {85, 90, 78, 92, 88};
+
+for (int i = 0; i &lt; scores.length; i++) {
+    System.out.println(scores[i]);
+}</pre><p class="reveal d4" style="margin-top: 28px;">The loop visits every item once.</p>
+</section>
+<section class="slide">
+<span class="section-number">17</span>
+<span class="eyebrow reveal d1">Why O(n)?</span>
+<h2 class="reveal d2">Work Follows the Number of Items</h2>
+<div class="timeline reveal d3">
+<div class="time">5</div><div class="task">5 items → about 5 checks</div>
+<div class="time">50</div><div class="task">50 items → about 50 checks</div>
+<div class="time">500</div><div class="task">500 items → about 500 checks</div>
+</div>
+</section>
+<section class="slide">
+<span class="section-number">18</span>
+<span class="eyebrow reveal d1">Connection</span>
+<h2 class="reveal d2">Linear Search Is O(n)</h2>
+<pre class="code-block code-small">for (int i = 0; i &lt; numbers.length; i++) {
+    if (numbers[i] == target) {
+        return i;
+    }
+}</pre><p class="reveal d4" style="margin-top: 28px;">In the worst case, the target is at the end or not there at all.</p>
+</section>
+<section class="slide">
+<span class="section-number">19</span>
+<span class="eyebrow reveal d1">Worst Case</span>
+<h2 class="reveal d2">Why We Say Worst Case</h2>
+<p class="reveal d3">Sometimes linear search gets lucky.</p>
+<ul>
+<li class="step">If target is first → 1 check</li>
+<li class="step">If target is last → n checks</li>
+<li class="step">If target is missing → n checks</li>
+</ul>
+<p class="reveal d4" style="margin-top: 28px;">Big O usually focuses on the worst-case growth.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Worst-case analysis describes the maximum work the algorithm may need for an input of size n.</p>
+</section>
+<section class="slide slide-accent">
+<span class="section-number">20</span>
+<span class="eyebrow reveal d1">Class Activity</span>
+<h2 class="reveal d2">Count the Checks</h2>
+<div class="quote-box reveal d3">Array: [4, 8, 15, 16, 23, 42]</div>
+<div class="question-card reveal d4">Target: 23<br/>How many checks before we find it?</div>
+<div class="output-block step">5 checks</div>
+</section>
+<section class="slide">
+<span class="section-number">21</span>
+<span class="eyebrow reveal d1">Understanding Check</span>
+<h2 class="reveal d2">Is This O(n)?</h2>
+<pre class="code-block code-small">for (int i = 0; i &lt; names.length; i++) {
+    System.out.println(names[i]);
+}</pre><div class="question-card reveal d4">Does the loop visit every name once?</div>
+<div class="output-block step">Yes. This is O(n).</div>
+</section>
+<section class="slide">
+<span class="section-number">22</span>
+<span class="eyebrow reveal d1">Pattern 3</span>
+<h2 class="reveal d2">O(n²): Loop Inside Another Loop</h2>
+<p class="reveal d3">O(n²) often happens when every item is compared with many other items.</p>
+<div class="quote-box reveal d4">A loop inside another loop usually means the work grows much faster.</div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">When both loops depend on n, the inner work repeats n times for each of n outer rounds.</p>
+</section>
+<section class="slide">
+<span class="section-number">23</span>
+<span class="eyebrow reveal d1">Java Example</span>
+<h2 class="reveal d2">Nested Loops</h2>
+<pre class="code-block code-small">for (int row = 1; row &lt;= n; row++) {
+    for (int column = 1; column &lt;= n; column++) {
+        System.out.print(&quot;* &quot;);
+    }
+    System.out.println();
+}</pre><p class="reveal d4" style="margin-top: 28px;">For every row, the inner loop runs many columns.</p>
+</section>
+<section class="slide">
+<span class="section-number">24</span>
+<span class="eyebrow reveal d1">Why O(n²)?</span>
+<h2 class="reveal d2">Work Multiplies</h2>
+<div class="timeline reveal d3">
+<div class="time">3</div><div class="task">3 rows × 3 columns = 9 prints</div>
+<div class="time">10</div><div class="task">10 rows × 10 columns = 100 prints</div>
+<div class="time">100</div><div class="task">100 rows × 100 columns = 10,000 prints</div>
+</div>
+</section>
+<section class="slide">
+<span class="section-number">25</span>
+<span class="eyebrow reveal d1">Real-Life Analogy</span>
+<h2 class="reveal d2">Everyone Shakes Hands</h2>
+<p class="reveal d3">Imagine every student shakes hands with every other student.</p>
+<ul>
+<li class="step">More students does not just add a little work</li>
+<li class="step">The number of possible pairings grows quickly</li>
+<li class="step">That kind of growth is similar to O(n²)</li>
+</ul>
+</section>
+<section class="slide">
+<span class="section-number">26</span>
+<span class="eyebrow reveal d1">Understanding Check</span>
+<h2 class="reveal d2">Is This O(n²)?</h2>
+<pre class="code-block code-small">for (int i = 0; i &lt; numbers.length; i++) {
+    for (int j = 0; j &lt; numbers.length; j++) {
+        System.out.println(numbers[i] + &quot;, &quot; + numbers[j]);
+    }
+}</pre><div class="question-card reveal d4">There is a loop inside another loop. What Big O pattern is likely?</div>
+<div class="output-block step">O(n²)</div>
+</section>
+<section class="slide">
+<span class="section-number">27</span>
+<span class="eyebrow reveal d1">Careful</span>
+<h2 class="reveal d2">Not Every Nested Loop Is Automatically Scary</h2>
+<p class="reveal d3">For beginners, use this safe rule:</p>
+<div class="quote-box reveal d4">If both loops depend on n, it is often O(n²).</div>
+<p class="reveal d5" style="margin-top: 28px;">Later, we will learn more exact analysis.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">A nested loop is not automatically O(n squared); its complexity depends on how each loop bound grows with the input.</p>
+</section>
+<section class="slide">
+<span class="section-number">28</span>
+<span class="eyebrow reveal d1">Pattern 4</span>
+<h2 class="reveal d2">O(log n): Cut in Half Again and Again</h2>
+<p class="reveal d3">O(log n) means the algorithm repeatedly reduces the problem size.</p>
+<div class="quote-box reveal d4">Instead of checking every item, we eliminate about half each step.</div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Logarithmic algorithms reduce the remaining problem by a constant factor, so the number of steps grows slowly.</p>
+</section>
+<section class="slide">
+<span class="section-number">29</span>
+<span class="eyebrow reveal d1">Real-Life Analogy</span>
+<h2 class="reveal d2">Guess the Number</h2>
+<p class="reveal d3">Think of guessing a number from 1 to 100.</p>
+<ul>
+<li class="step">Do not start at 1, then 2, then 3...</li>
+<li class="step">Ask: “Is it higher or lower than 50?”</li>
+<li class="step">Then remove half of the choices</li>
+<li class="step">Repeat until only one answer remains</li>
+</ul>
+</section>
+<section class="slide">
+<span class="section-number">30</span>
+<span class="eyebrow reveal d1">Connection</span>
+<h2 class="reveal d2">Binary Search Is O(log n)</h2>
+<pre class="code-block code-small">while (left &lt;= right) {
+    int middle = (left + right) / 2;
+
+    if (numbers[middle] == target) {
+        return middle;
+    } else if (numbers[middle] &lt; target) {
+        left = middle + 1;
+    } else {
+        right = middle - 1;
+    }
+}</pre><p class="reveal d4" style="margin-top: 28px;">Each loop removes half of the remaining search area.</p>
+</section>
+<section class="slide">
+<span class="section-number">31</span>
+<span class="eyebrow reveal d1">Important Requirement</span>
+<h2 class="reveal d2">Binary Search Needs Sorted Data</h2>
+<p class="reveal d3">Binary search only works when the data is already sorted.</p>
+<div class="mini-check reveal d4"><div>Sorted: [1, 3, 5, 7, 9]</div><div>Not sorted: [7, 1, 9, 3, 5]</div></div>
+<p class="reveal d5" style="margin-top: 28px;">Without order, cutting in half does not make sense.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">The middle comparison can safely discard half only when the values are already ordered.</p>
+</section>
+<section class="slide">
+<span class="section-number">32</span>
+<span class="eyebrow reveal d1">Size Comparison</span>
+<h2 class="reveal d2">How Many Steps?</h2>
+<div class="timeline reveal d3">
+<div class="time">8</div><div class="task">8 items → about 3 halving steps</div>
+<div class="time">16</div><div class="task">16 items → about 4 halving steps</div>
+<div class="time">32</div><div class="task">32 items → about 5 halving steps</div>
+</div>
+<p class="reveal d4" style="margin-top: 28px;">That is why O(log n) grows slowly.</p>
+</section>
+<section class="slide">
+<span class="section-number">33</span>
+<span class="eyebrow reveal d1">Big Picture</span>
+<h2 class="reveal d2">Compare the Four Patterns</h2>
+<div class="comparison-grid reveal d3">
+<div class="comparison-card"><div class="icon">🎯</div><h3>O(1)</h3><p>Direct access</p></div>
+<div class="comparison-card"><div class="icon">🚶</div><h3>O(n)</h3><p>One full pass</p></div>
+<div class="comparison-card"><div class="icon">🌗</div><h3>O(log n)</h3><p>Cut in half</p></div>
+</div>
+<div class="mini-check reveal d4"><div><strong>O(n²)</strong> usually comes from nested loops that depend on n.</div></div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">For large inputs, O(1) grows least, followed by O(log n), O(n), and O(n squared).</p>
+</section>
+<section class="slide">
+<span class="section-number">34</span>
+<span class="eyebrow reveal d1">Quick Table</span>
+<h2 class="reveal d2">When n Gets Bigger</h2>
+<div class="table-like reveal d3">
+<div><strong>Pattern</strong></div><div><strong>If n = 100</strong></div><div><strong>Simple Meaning</strong></div>
+<div>O(1)</div><div>1 step</div><div>Direct</div>
+<div>O(log n)</div><div>about 7 steps</div><div>Halving</div>
+<div>O(n)</div><div>100 steps</div><div>Check each item</div>
+<div>O(n²)</div><div>10,000 steps</div><div>Nested work</div>
+</div>
+</section>
+<section class="slide">
+<span class="section-number">35</span>
+<span class="eyebrow reveal d1">Beginner Rule</span>
+<h2 class="reveal d2">Ignore Small Details First</h2>
+<p class="reveal d3">When learning Big O, focus on the biggest growing part.</p>
+<ul>
+<li class="step">O(n + 5) becomes O(n)</li>
+<li class="step">O(2n) becomes O(n)</li>
+<li class="step">O(n² + n) becomes O(n²)</li>
+</ul>
+<p class="reveal d4" style="margin-top: 28px;">We simplify so the growth pattern is easier to see.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Big O normally drops constants and lower-order terms because the fastest-growing part dominates for large n.</p>
+</section>
+<section class="slide">
+<span class="section-number">36</span>
+<span class="eyebrow reveal d1">Example</span>
+<h2 class="reveal d2">One Loop Plus One Direct Step</h2>
+<pre class="code-block code-small">System.out.println(scores[0]);
+
+for (int i = 0; i &lt; scores.length; i++) {
+    System.out.println(scores[i]);
+}</pre><div class="question-card reveal d4">O(1) + O(n) becomes what?</div>
+<div class="output-block step">O(n)</div>
+</section>
+<section class="slide">
+<span class="section-number">37</span>
+<span class="eyebrow reveal d1">Guided Practice</span>
+<h2 class="reveal d2">Identify the Big O</h2>
+<pre class="code-block code-small">int total = 0;
+for (int i = 0; i &lt; numbers.length; i++) {
+    total += numbers[i];
+}</pre><div class="question-card reveal d4">The loop visits every item once. What is the Big O?</div>
+<div class="output-block step">O(n)</div>
+</section>
+<section class="slide">
+<span class="section-number">38</span>
+<span class="eyebrow reveal d1">Guided Practice</span>
+<h2 class="reveal d2">Identify the Big O</h2>
+<pre class="code-block">System.out.println(numbers[2]);</pre><div class="question-card reveal d4">Direct index access. What is the Big O?</div>
+<div class="output-block step">O(1)</div>
+</section>
+<section class="slide">
+<span class="section-number">39</span>
+<span class="eyebrow reveal d1">Guided Practice</span>
+<h2 class="reveal d2">Identify the Big O</h2>
+<pre class="code-block code-small">for (int i = 0; i &lt; numbers.length; i++) {
+    for (int j = 0; j &lt; numbers.length; j++) {
+        System.out.println(i + &quot; &quot; + j);
+    }
+}</pre><div class="question-card reveal d4">Two loops that both depend on n. What is the Big O?</div>
+<div class="output-block step">O(n²)</div>
+</section>
+<section class="slide slide-accent">
+<span class="section-number">40</span>
+<span class="eyebrow reveal d1">Class Activity</span>
+<h2 class="reveal d2">Book Search Comparison</h2>
+<div class="comparison-grid reveal d3">
+<div class="comparison-card"><div class="icon">📖</div><h3>Method A</h3><p>Check every book from left to right.</p></div>
+<div class="comparison-card"><div class="icon">🔎</div><h3>Method B</h3><p>Use an alphabetical shelf and jump closer.</p></div>
+</div>
+<div class="question-card reveal d4">Which one behaves more like O(n)? Which one behaves more like O(log n)?</div>
+</section>
+<section class="slide">
+<span class="section-number">41</span>
+<span class="eyebrow reveal d1">Student Task</span>
+<h2 class="reveal d2">Write the Big O Beside Each Code</h2>
+<ul>
+<li class="step">Direct array access</li>
+<li class="step">Loop through all names</li>
+<li class="step">Nested loop for rows and columns</li>
+<li class="step">Binary search on sorted values</li>
+</ul>
+<p class="reveal d4" style="margin-top: 28px;">Answer using only: O(1), O(n), O(n²), or O(log n).</p>
+</section>
+<section class="slide">
+<span class="section-number">42</span>
+<span class="eyebrow reveal d1">Common Mistake</span>
+<h2 class="reveal d2">Do Not Memorize Blindly</h2>
+<p class="reveal d3">Big O is not just memorizing symbols.</p>
+<div class="quote-box reveal d4">Always ask: “How many times does the main work happen as n grows?”</div>
+</section>
+<section class="slide">
+<span class="section-number">43</span>
+<span class="eyebrow reveal d1">Common Mistake</span>
+<h2 class="reveal d2">Do Not Focus on Milliseconds Yet</h2>
+<ul>
+<li class="step">A small O(n²) program may look fast for tiny input</li>
+<li class="step">A big O(n) program may still take time for huge input</li>
+<li class="step">Big O helps us predict growth, not exact clock time</li>
+</ul>
+</section>
+<section class="slide">
+<span class="section-number">44</span>
+<span class="eyebrow reveal d1">Mini Quiz</span>
+<h2 class="reveal d2">Check Your Understanding</h2>
+<div class="mini-check reveal d3"><div>What does n mean?</div><div>Which Big O is direct access?</div></div>
+<div class="mini-check reveal d4"><div>Which Big O checks every item?</div><div>Which Big O often uses nested loops?</div></div>
+<div class="mini-check reveal d5"><div>Which Big O cuts the search area in half?</div><div>Why must binary search use sorted data?</div></div>
+</section>
+<section class="slide slide-dark">
+<span class="section-number">45</span>
+<span class="eyebrow reveal d1">Lesson Summary</span>
+<h2 class="reveal d2">What We Learned Today</h2>
+<ul>
+<li class="step">Big O describes growth of work as input becomes bigger</li>
+<li class="step">O(1) means one direct step</li>
+<li class="step">O(n) means check every item once</li>
+<li class="step">O(n²) often means loop inside another loop</li>
+<li class="step">O(log n) means repeatedly cut the problem in half</li>
+<li class="step">Big O helps us compare algorithms before writing large programs</li>
+</ul>
+</section>
+<section class="slide">
+<span class="section-number">46</span>
+<span class="eyebrow reveal d1">Exit Check</span>
+<h2 class="reveal d2">Answer Before Leaving</h2>
+<div class="quote-box reveal d3">In your own words, what does Big O tell us?</div>
+<p class="reveal d4" style="margin-top: 28px;">Starter answer:</p>
+<div class="output-block reveal d5">Big O tells us how...</div>
+</section>
+<section class="slide slide-accent">
+<span class="eyebrow reveal d1">Coming Up Next</span>
+<h1 class="reveal d2" style="font-size: 82px;">Lesson 14:<br/>Nested Loops and Simple Analysis</h1>
+<p class="reveal d3" style="font-size: 36px; margin-top: 28px; max-width: 1350px;">Next, we will practice nested loops by printing rectangles, triangles, and multiplication tables.</p>
+</section>
+<div aria-label="Presentation controls" class="deck-controls">
+<button aria-label="Previous slide" id="deckPrev" type="button">← Previous</button>
+<span class="deck-count" id="deckCount">1 / 1</span>
+<button aria-label="Next slide" id="deckNext" type="button">Next →</button>
+</div>
+<script>
+(function () {
+  function initDeckControls() {
+    const prev = document.getElementById('deckPrev');
+    const next = document.getElementById('deckNext');
+    const count = document.getElementById('deckCount');
+    function update() {
+      if (!window.slides || !window.slides.slides) return;
+      count.textContent = (window.slides.currentSlide + 1) + ' / ' + window.slides.slides.length;
+      prev.disabled = window.slides.currentSlide <= 0;
+      next.disabled = window.slides.currentSlide >= window.slides.slides.length - 1;
+      prev.style.opacity = prev.disabled ? '.45' : '1';
+      next.style.opacity = next.disabled ? '.45' : '1';
+    }
+    prev.addEventListener('click', function () { if (window.slides) window.slides.retreat(); setTimeout(update, 550); });
+    next.addEventListener('click', function () { if (window.slides) window.slides.advance(); setTimeout(update, 550); });
+    document.addEventListener('keydown', function () { setTimeout(update, 50); });
+    window.addEventListener('wheel', function () { setTimeout(update, 600); }, { passive: true });
+    window.addEventListener('touchend', function () { setTimeout(update, 650); }, { passive: true });
+    window.addEventListener('hashchange', function () { setTimeout(update, 100); });
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    setTimeout(update, 150);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initDeckControls);
+  else initDeckControls();
+})();
+</script>
+<script>
+(function () {
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function span(cls, value) {
+    return '<span class="' + cls + '">' + escapeHtml(value) + '</span>';
+  }
+
+  function highlightJava(code) {
+    const keywords = new Set([
+      'public','private','protected','class','static','void','if','else','for','while','do','return',
+      'import','new','true','false','null','break','continue','final','this'
+    ]);
+    const types = new Set(['int','double','char','boolean','String','Scanner','System','Arrays','Math','Integer']);
+    const methods = new Set(['println','print','nextInt','nextLine','main','length','toString','max','min','linearSearch','searchName','equals','indexOf']);
+    let out = '';
+    let i = 0;
+
+    while (i < code.length) {
+      const ch = code[i];
+      const next = code[i + 1] || '';
+
+      if (ch === '/' && next === '/') {
+        let j = i;
+        while (j < code.length && code[j] !== '\n') j++;
+        out += span('comment', code.slice(i, j));
+        i = j;
+        continue;
+      }
+
+      if (ch === '"' || ch === "'") {
+        const quote = ch;
+        let j = i + 1;
+        while (j < code.length) {
+          if (code[j] === '\\') { j += 2; continue; }
+          if (code[j] === quote) { j++; break; }
+          j++;
+        }
+        out += span('string', code.slice(i, j));
+        i = j;
+        continue;
+      }
+
+      if (/[A-Za-z_$]/.test(ch)) {
+        let j = i + 1;
+        while (j < code.length && /[A-Za-z0-9_$]/.test(code[j])) j++;
+        const word = code.slice(i, j);
+        let k = j;
+        while (k < code.length && /\s/.test(code[k])) k++;
+        if (keywords.has(word)) out += span('keyword', word);
+        else if (types.has(word)) out += span('class-name', word);
+        else if (methods.has(word) && code[k] === '(') out += span('method', word);
+        else out += escapeHtml(word);
+        i = j;
+        continue;
+      }
+
+      if (/[0-9]/.test(ch)) {
+        let j = i + 1;
+        while (j < code.length && /[0-9.]/.test(code[j])) j++;
+        out += span('num', code.slice(i, j));
+        i = j;
+        continue;
+      }
+
+      const two = code.slice(i, i + 2);
+      if (['>=','<=','==','!=','&&','||','++','--','+=','-=','*=','/='].includes(two)) {
+        out += span('op', two);
+        i += 2;
+        continue;
+      }
+      if ('><=+-*/%'.includes(ch)) { out += span('op', ch); i++; continue; }
+      if ('{}()[];,.'.includes(ch)) { out += span('bracket', ch); i++; continue; }
+
+      out += escapeHtml(ch);
+      i++;
+    }
+    return out;
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('pre.code-block').forEach(function (block) {
+      if (block.dataset.highlighted === 'true') return;
+      block.innerHTML = highlightJava(block.textContent);
+      block.dataset.highlighted = 'true';
+    });
+  });
+})();
+</script>
+
+<script id="dsa-mobile-responsive-controls-script">
+(function () {
+    'use strict';
+
+    const MOBILE_QUERY = '(max-width: 1024px), (hover: none), (pointer: coarse)';
+    const CANVAS_W = 1920;
+    const CANVAS_H = 1080;
+    let scaleMode = 'reading';
+    let customScale = null;
+    let touchStartedInSlide = false;
+
+    function isMobile() { return window.matchMedia(MOBILE_QUERY).matches; }
+    function slidesArray() {
+        return window.slides?.slides || Array.from(document.querySelectorAll('.slide'));
+    }
+    function currentIndex() {
+        const deck = window.slides;
+        if (deck && Number.isInteger(deck.currentSlide)) return deck.currentSlide;
+        const hash = location.hash.replace(/^#/, '');
+        const slides = slidesArray();
+        const index = slides.findIndex((slide) => slide.id === hash);
+        return index >= 0 ? index : 0;
+    }
+    function currentSlide() {
+        const slides = slidesArray();
+        return slides[Math.max(0, Math.min(slides.length - 1, currentIndex()))] || null;
+    }
+
+    function ensureCurrentSlideReveals() {
+        const deck = window.slides;
+        const slide = currentSlide();
+        if (!slide) return;
+        document.documentElement.classList.add('reveals-ready');
+        slide.classList.add('visible');
+        if (deck && typeof deck._playSlideReveals === 'function') {
+            try { deck._playSlideReveals(slide); } catch (_) {}
+        } else {
+            slide.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale,.reveal-blur').forEach((el) => {
+                el.style.opacity = el._targetOpacity ?? '1';
+                el.style.visibility = 'visible';
+                el.style.transform = 'none';
+                el.style.filter = 'none';
+            });
+        }
+    }
+
+    function stepState() {
+        const slide = currentSlide();
+        const all = slide ? Array.from(slide.querySelectorAll('.step')) : [];
+        const shown = all.filter((el) => el.classList.contains('step-shown'));
+        const hidden = all.filter((el) => !el.classList.contains('step-shown'));
+        return { slide, all, shown, hidden };
+    }
+
+    function revealElement(el, delay) {
+        if (!el) return;
+        const deck = window.slides;
+        el.classList.add('step-shown');
+        if (deck && typeof deck._playReveal === 'function') {
+            try { deck._playReveal(el, delay || 0); return; } catch (_) {}
+        }
+        el.style.opacity = el._targetOpacity ?? '1';
+        el.style.visibility = 'visible';
+        el.style.transform = 'none';
+        el.style.filter = 'none';
+    }
+
+    function hideElement(el) {
+        if (!el) return;
+        const deck = window.slides;
+        el.classList.remove('step-shown');
+        if (deck && typeof deck._cancelReveal === 'function') {
+            try { deck._cancelReveal(el); } catch (_) {}
+        }
+        if (deck && typeof deck._applyHiddenStyle === 'function') {
+            try { deck._applyHiddenStyle(el); return; } catch (_) {}
+        }
+        el.style.opacity = '0';
+        el.style.visibility = 'hidden';
+    }
+
+    function revealNextStep() {
+        ensureCurrentSlideReveals();
+        const { hidden } = stepState();
+        if (hidden[0]) revealElement(hidden[0], 0);
+        setTimeout(updateControls, 80);
+    }
+
+    function hidePreviousStep() {
+        const { shown } = stepState();
+        if (shown.length) hideElement(shown[shown.length - 1]);
+        setTimeout(updateControls, 50);
+    }
+
+    function revealAllSteps() {
+        ensureCurrentSlideReveals();
+        const { hidden } = stepState();
+        hidden.forEach((el, index) => setTimeout(() => {
+            revealElement(el, 0);
+            if (index === hidden.length - 1) updateControls();
+        }, index * 90));
+        if (!hidden.length) updateControls();
+    }
+
+    function computeScale() {
+        const fit = Math.max(0.12, Math.min(
+            window.innerWidth / CANVAS_W,
+            Math.max(180, window.innerHeight - 112) / CANVAS_H
+        ));
+        if (customScale != null) return Math.max(0.12, Math.min(1.35, customScale));
+        if (scaleMode === 'fit') return fit;
+        if (window.innerHeight > window.innerWidth) return Math.max(fit, 0.44);
+        return fit;
+    }
+
+    function applyMobileScale() {
+        if (!isMobile()) return;
+        const scale = computeScale();
+        const width = Math.round(CANVAS_W * scale);
+        const height = Math.round(CANVAS_H * scale);
+        const verticalSpace = Math.max(16, Math.round((window.innerHeight - Math.min(height, window.innerHeight - 112)) / 2));
+        document.querySelectorAll('.slide-scale').forEach((scaleEl) => {
+            scaleEl.style.setProperty('--dsa-mobile-scale', String(scale));
+            scaleEl.style.setProperty('--dsa-mobile-width', width + 'px');
+            scaleEl.style.setProperty('--dsa-mobile-height', height + 'px');
+            scaleEl.style.setProperty('--dsa-mobile-margin', verticalSpace + 'px');
+            const viewport = scaleEl.parentElement;
+            if (viewport) requestAnimationFrame(() => {
+                viewport.scrollLeft = Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2);
+                viewport.scrollTop = Math.max(0, Math.min(viewport.scrollTop, viewport.scrollHeight - viewport.clientHeight));
+            });
+        });
+    }
+
+    function zoomBy(amount) {
+        customScale = computeScale() + amount;
+        scaleMode = 'custom';
+        applyMobileScale();
+    }
+    function fitSlide() {
+        customScale = null;
+        scaleMode = 'fit';
+        applyMobileScale();
+    }
+
+    function rgbaParts(value) {
+        if (!value) return null;
+        const m = value.match(/rgba?\(\s*([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)/i);
+        if (!m) return null;
+        return { r:+m[1], g:+m[2], b:+m[3], a:m[4] == null ? 1 : +m[4] };
+    }
+    function luminance(rgb) {
+        const c = [rgb.r,rgb.g,rgb.b].map((v) => {
+            v /= 255;
+            return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
+        });
+        return .2126*c[0] + .7152*c[1] + .0722*c[2];
+    }
+    function effectiveBackground(el) {
+        let node = el;
+        while (node && node !== document.documentElement) {
+            const color = rgbaParts(getComputedStyle(node).backgroundColor);
+            if (color && color.a >= .72) return color;
+            node = node.parentElement;
+        }
+        return rgbaParts(getComputedStyle(document.body).backgroundColor) || {r:255,g:255,b:255,a:1};
+    }
+    function hasDirectText(el) {
+        return Array.from(el.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    }
+    function fixTextContrast() {
+        const selector = '.slide h1,.slide h2,.slide h3,.slide h4,.slide h5,.slide h6,.slide p,.slide li,.slide dt,.slide dd,.slide td,.slide th,.slide label,.slide small,.slide blockquote,.slide strong,.slide em,.slide span,.slide code';
+        document.querySelectorAll(selector).forEach((el) => {
+            if (!(el instanceof HTMLElement) || !hasDirectText(el)) return;
+            if (el.closest('pre,.code-block') && !el.matches('pre,.code-block')) return;
+            const bg = effectiveBackground(el);
+            const fg = rgbaParts(getComputedStyle(el).color);
+            if (!fg) return;
+            const bgLum = luminance(bg), fgLum = luminance(fg);
+            el.classList.remove('dsa-force-dark-text','dsa-force-light-text');
+            if (bgLum > .67 && fgLum > .62) el.classList.add('dsa-force-dark-text');
+            if (bgLum < .17 && fgLum < .28) el.classList.add('dsa-force-light-text');
+        });
+    }
+
+    function buildControls() {
+        if (document.querySelector('.dsa-mobile-controls')) return;
+        const slides = slidesArray();
+        if (!slides.length) return;
+        const controls = document.createElement('div');
+        controls.className = 'dsa-mobile-controls';
+        controls.setAttribute('role','navigation');
+        controls.setAttribute('aria-label','Mobile presentation and animation controls');
+        controls.innerHTML = `
+            <div class="dsa-mobile-controls__row">
+                <button type="button" data-action="previous-slide" aria-label="Previous slide">‹</button>
+                <span class="dsa-mobile-controls__count" aria-live="polite">1 / ${slides.length}</span>
+                <button type="button" data-action="next-slide" aria-label="Next slide">›</button>
+            </div>
+            <div class="dsa-mobile-controls__row dsa-mobile-controls__row--tools">
+                <button type="button" data-action="back-step" aria-label="Hide previous animation step">↶</button>
+                <button type="button" data-action="reveal-step" aria-label="Reveal next animation step">Reveal</button>
+                <button type="button" data-action="show-all" aria-label="Reveal all animation steps">All</button>
+                <button type="button" data-action="zoom-out" aria-label="Zoom out">−</button>
+                <button type="button" data-action="fit" aria-label="Fit entire slide">Fit</button>
+                <button type="button" data-action="zoom-in" aria-label="Zoom in">+</button>
+            </div>
+            <div class="dsa-mobile-controls__steps" aria-live="polite">Steps 0 / 0</div>`;
+        document.body.appendChild(controls);
+
+        controls.addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+            const deck = window.slides;
+            switch (button.dataset.action) {
+                case 'previous-slide':
+                    if (deck?.prev) deck.prev();
+                    break;
+                case 'next-slide':
+                    if (deck?.next) deck.next();
+                    break;
+                case 'back-step': hidePreviousStep(); break;
+                case 'reveal-step': revealNextStep(); break;
+                case 'show-all': revealAllSteps(); break;
+                case 'zoom-out': zoomBy(-0.08); break;
+                case 'fit': fitSlide(); break;
+                case 'zoom-in': zoomBy(0.08); break;
+            }
+            setTimeout(() => {
+                ensureCurrentSlideReveals();
+                updateControls();
+                fixTextContrast();
+            }, 140);
+        });
+    }
+
+    function updateControls() {
+        const controls = document.querySelector('.dsa-mobile-controls');
+        if (!controls) return;
+        const slides = slidesArray();
+        const index = Math.max(0, Math.min(slides.length - 1, currentIndex()));
+        const { all, shown, hidden } = stepState();
+        const count = controls.querySelector('.dsa-mobile-controls__count');
+        const steps = controls.querySelector('.dsa-mobile-controls__steps');
+        const previous = controls.querySelector('[data-action="previous-slide"]');
+        const next = controls.querySelector('[data-action="next-slide"]');
+        const backStep = controls.querySelector('[data-action="back-step"]');
+        const reveal = controls.querySelector('[data-action="reveal-step"]');
+        const showAll = controls.querySelector('[data-action="show-all"]');
+        count.textContent = `${index + 1} / ${slides.length}`;
+        steps.textContent = `Steps ${shown.length} / ${all.length}`;
+        previous.disabled = index <= 0;
+        next.disabled = index >= slides.length - 1;
+        backStep.disabled = shown.length === 0;
+        reveal.disabled = hidden.length === 0;
+        showAll.disabled = hidden.length === 0;
+    }
+
+    function stopSlideSwipeFromHijackingPan() {
+        window.addEventListener('touchstart', (event) => {
+            touchStartedInSlide = !!event.target.closest?.('.slide-viewport');
+        }, {capture:true, passive:true});
+        window.addEventListener('touchend', (event) => {
+            if (isMobile() && touchStartedInSlide && !event.target.closest?.('.dsa-mobile-controls')) {
+                event.stopImmediatePropagation();
+            }
+            touchStartedInSlide = false;
+        }, {capture:true, passive:true});
+        window.addEventListener('touchcancel', () => { touchStartedInSlide = false; }, {capture:true, passive:true});
+    }
+
+    function initialize() {
+        buildControls();
+        stopSlideSwipeFromHijackingPan();
+        fixTextContrast();
+        if (isMobile()) {
+            applyMobileScale();
+            setTimeout(() => {
+                ensureCurrentSlideReveals();
+                updateControls();
+                fixTextContrast();
+                applyMobileScale();
+            }, 160);
+            setTimeout(() => {
+                ensureCurrentSlideReveals();
+                updateControls();
+            }, 650);
+        }
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, {once:true});
+    else initialize();
+
+    window.addEventListener('load', () => {
+        ensureCurrentSlideReveals();
+        updateControls();
+        fixTextContrast();
+        applyMobileScale();
+    });
+    window.addEventListener('hashchange', () => setTimeout(() => {
+        ensureCurrentSlideReveals();
+        updateControls();
+        fixTextContrast();
+    }, 120));
+    window.addEventListener('resize', () => setTimeout(() => {
+        applyMobileScale();
+        ensureCurrentSlideReveals();
+        updateControls();
+        fixTextContrast();
+    }, 160));
+    document.addEventListener('keydown', () => setTimeout(updateControls, 60));
+    document.addEventListener('scroll', () => requestAnimationFrame(updateControls), {passive:true});
+    setInterval(updateControls, 800);
+})();
+</script>
+
+
+<script id="dsa-final-smart-contrast">
+(function () {
+  'use strict';
+  const DARK = 'dsa-final-dark-text';
+  const LIGHT = 'dsa-final-light-text';
+  let queued = false;
+
+  function parseColor(value) {
+    if (!value) return null;
+    const m = value.match(/rgba?\(\s*([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)/i);
+    if (!m) return null;
+    return { r:+m[1], g:+m[2], b:+m[3], a:m[4] == null ? 1 : +m[4] };
+  }
+  function mix(fg, bg) {
+    const a = fg.a + bg.a * (1 - fg.a);
+    if (a <= 0) return {r:255,g:255,b:255,a:1};
+    return {
+      r:(fg.r*fg.a + bg.r*bg.a*(1-fg.a))/a,
+      g:(fg.g*fg.a + bg.g*bg.a*(1-fg.a))/a,
+      b:(fg.b*fg.a + bg.b*bg.a*(1-fg.a))/a,
+      a
+    };
+  }
+  function luminance(c) {
+    const values = [c.r,c.g,c.b].map(v => {
+      v /= 255;
+      return v <= .04045 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4);
+    });
+    return .2126*values[0] + .7152*values[1] + .0722*values[2];
+  }
+  function contrast(a,b) {
+    const l1 = luminance(a), l2 = luminance(b);
+    return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
+  }
+  function effectiveBackground(el) {
+    const chain = [];
+    let node = el;
+    while (node && node.nodeType === 1) {
+      chain.push(node);
+      node = node.parentElement;
+    }
+    let color = {r:255,g:255,b:255,a:1};
+    for (let i=chain.length-1; i>=0; i--) {
+      const parsed = parseColor(getComputedStyle(chain[i]).backgroundColor);
+      if (parsed && parsed.a > 0) color = mix(parsed, color);
+    }
+    return color;
+  }
+  function containsReadableText(el) {
+    return Array.from(el.childNodes).some(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length);
+  }
+  function fontThreshold(el) {
+    const cs = getComputedStyle(el);
+    const size = parseFloat(cs.fontSize) || 16;
+    const weight = parseInt(cs.fontWeight,10) || 400;
+    return size >= 24 || (size >= 18.66 && weight >= 700) ? 3 : 4.5;
+  }
+  function repairContrast() {
+    const root = document.querySelector('.slide.visible') || document;
+    const selector = 'h1,h2,h3,h4,h5,h6,p,li,dt,dd,td,th,label,small,blockquote,strong,em,span,code,a,button';
+    root.querySelectorAll(selector).forEach(el => {
+      if (!(el instanceof HTMLElement) || !containsReadableText(el)) return;
+      if (el.closest('.deck-controls,.dsa-mobile-controls')) return;
+      if (el.closest('pre,.code-block') && !el.matches('pre,.code-block,code')) return;
+      el.classList.remove(DARK,LIGHT,'dsa-force-dark-text','dsa-force-light-text');
+      const fg = parseColor(getComputedStyle(el).color);
+      if (!fg) return;
+      const bg = effectiveBackground(el);
+      if (contrast(fg,bg) >= fontThreshold(el)) return;
+      const black = {r:17,g:24,b:39,a:1};
+      const white = {r:248,g:250,b:252,a:1};
+      el.classList.add(contrast(black,bg) >= contrast(white,bg) ? DARK : LIGHT);
+    });
+  }
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; repairContrast(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true});
+  else schedule();
+  window.addEventListener('load', schedule);
+  window.addEventListener('hashchange', () => setTimeout(schedule, 80));
+  window.addEventListener('resize', schedule);
+  document.addEventListener('click', () => setTimeout(schedule, 90), true);
+  document.addEventListener('keydown', () => setTimeout(schedule, 90), true);
+  setTimeout(schedule, 250);
+  setTimeout(schedule, 900);
+})();
+</script>
+
+
+<script id="dsa-uniform-presentation-size-script">
+(function () {
+  'use strict';
+  const MOBILE_QUERY = '(max-width: 1024px), (hover: none), (pointer: coarse)';
+  const CANVAS_W = 1920;
+  const CANVAS_H = 1080;
+
+  function isMobileLayout() {
+    return window.matchMedia(MOBILE_QUERY).matches;
+  }
+
+  function uniformFitScale() {
+    const horizontalPadding = 8;
+    const controlsAllowance = 52;
+    const usableWidth = Math.max(280, window.innerWidth - horizontalPadding);
+    const usableHeight = Math.max(180, window.innerHeight - controlsAllowance);
+    return Math.max(0.12, Math.min(usableWidth / CANVAS_W, usableHeight / CANVAS_H));
+  }
+
+  function applyUniformFit(resetScroll) {
+    if (!isMobileLayout()) return;
+    const scale = uniformFitScale();
+    const width = Math.round(CANVAS_W * scale);
+    const height = Math.round(CANVAS_H * scale);
+    const topSpace = Math.max(4, Math.round((Math.max(0, window.innerHeight - 52 - height)) / 2));
+
+    document.querySelectorAll('.slide-scale').forEach((scaleEl) => {
+      scaleEl.style.setProperty('--dsa-mobile-scale', String(scale));
+      scaleEl.style.setProperty('--dsa-mobile-width', width + 'px');
+      scaleEl.style.setProperty('--dsa-mobile-height', height + 'px');
+      scaleEl.style.setProperty('--dsa-mobile-margin', topSpace + 'px');
+      scaleEl.dataset.dsaUniformFit = 'true';
+
+      const viewport = scaleEl.parentElement;
+      if (viewport && resetScroll) {
+        requestAnimationFrame(() => {
+          viewport.scrollLeft = 0;
+          viewport.scrollTop = 0;
+        });
+      }
+    });
+  }
+
+  function changeOriginalMobileDefault() {
+    /* The existing controller starts in a larger reading mode. Trigger its Fit
+       action once, then reinforce the exact same fit on every slide. */
+    const fitButton = document.querySelector('.dsa-mobile-controls [data-action="fit"]');
+    if (fitButton && !fitButton.dataset.dsaAutoFitDone) {
+      fitButton.dataset.dsaAutoFitDone = 'true';
+      fitButton.click();
+    }
+    applyUniformFit(true);
+  }
+
+  function init() {
+    if (!isMobileLayout()) return;
+    changeOriginalMobileDefault();
+    setTimeout(changeOriginalMobileDefault, 120);
+    setTimeout(changeOriginalMobileDefault, 500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+  window.addEventListener('load', init);
+  window.addEventListener('orientationchange', () => setTimeout(() => applyUniformFit(true), 160));
+  window.addEventListener('resize', () => applyUniformFit(true));
+  window.addEventListener('hashchange', () => setTimeout(() => applyUniformFit(true), 40));
+})();
+</script>
+
+</body>
+</html>

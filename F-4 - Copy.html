@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" name="viewport"/>
+<title>Lesson 28 – Tree Traversals - Student Copy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --background:#fafafa; --foreground:#1a1a1a; --accent:#FF5722; --accent-foreground:#ffffff;
+  --card:#FF5722; --card-foreground:#ffffff; --code-bg:#1e1e2e; --code-fg:#cdd6f4;
+  --font-display:'Archivo Black',sans-serif; --font-body:'Space Grotesk',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --muted-foreground:color-mix(in srgb,var(--foreground) 55%,transparent); --border:color-mix(in srgb,var(--foreground) 12%,transparent);
+}
+html, body { height:100%; overflow:hidden; background:var(--background); font-family:var(--font-body); color:var(--foreground); }
+.deck { width:100vw; height:100vh; position:relative; overflow:hidden; }
+.slide-scale { width:1920px; height:1080px; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) scale(var(--slide-scale,1)); transform-origin:center center; }
+.slide { width:1920px; height:1080px; padding:80px; overflow:hidden; display:flex; flex-direction:column; justify-content:center; gap:28px; position:absolute; inset:0; opacity:0; pointer-events:none; background:var(--background); transition:opacity .28s ease; }
+.slide.active { opacity:1; pointer-events:auto; }
+h1 { font-family:var(--font-display); font-size:110px; line-height:1.05; letter-spacing:-2px; margin:0; }
+h2 { font-family:var(--font-display); font-size:64px; line-height:1.1; letter-spacing:-1px; margin:0 0 20px 0; }
+h3 { font-family:var(--font-display); font-size:40px; line-height:1.16; margin:0 0 14px 0; }
+p, li { font-size:34px; line-height:1.42; color:color-mix(in srgb,var(--foreground) 76%,transparent); max-width:1000px; }
+ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:18px; }
+li { padding-left:42px; position:relative; }
+li::before { content:'→'; position:absolute; left:0; color:var(--accent); font-weight:700; }
+.eyebrow { font-family:var(--font-mono); font-size:24px; color:var(--accent); text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; display:block; font-weight:700; }
+.section-number { font-family:var(--font-display); font-size:190px; color:color-mix(in srgb,var(--accent) 12%,transparent); position:absolute; top:38px; right:76px; line-height:1; }
+.highlight { color:var(--accent); font-weight:800; }
+.slide-dark { background:var(--foreground); color:var(--background); }
+.slide-dark h1, .slide-dark h2, .slide-dark h3 { color:var(--background); }
+.slide-dark p, .slide-dark li { color:color-mix(in srgb,var(--background) 78%,transparent); }
+.slide-dark .section-number { color:color-mix(in srgb,var(--accent) 24%,transparent); }
+.slide-accent { background:var(--accent); color:var(--accent-foreground); }
+.slide-accent h1, .slide-accent h2, .slide-accent h3 { color:var(--accent-foreground); }
+.slide-accent p, .slide-accent li { color:color-mix(in srgb,var(--accent-foreground) 88%,transparent); }
+.slide-accent .eyebrow { color:var(--accent-foreground); opacity:.85; }
+.slide-accent .section-number { color:rgba(255,255,255,.18); }
+.reveal, .step { opacity:0; transform:translateY(26px); transition:opacity .65s cubic-bezier(.16,1,.3,1), transform .65s cubic-bezier(.16,1,.3,1); }
+.slide.active .reveal.show, .slide.active .step.show { opacity:1; transform:translateY(0); }
+.d1 { transition-delay:.10s; } .d2 { transition-delay:.22s; } .d3 { transition-delay:.34s; } .d4 { transition-delay:.46s; } .d5 { transition-delay:.58s; }
+.code-block { background:var(--code-bg); color:var(--code-fg); font-family:var(--font-mono); font-size:28px; line-height:1.48; padding:34px 42px; border-radius:16px; margin-top:12px; max-width:1450px; width:max-content; min-width:min(100%,900px); white-space:pre-wrap; overflow:visible; box-shadow:0 18px 44px rgba(0,0,0,.16); }
+.code-wide { max-width:1520px; width:100%; }
+.code-med { font-size:24px; line-height:1.35; padding:28px 36px; max-width:1420px; width:100%; }
+.code-compact { font-size:26px; line-height:1.38; padding:30px 38px; max-width:1200px; width:100%; }
+.code-fit { font-size:18px; line-height:1.22; padding:20px 28px; max-width:1560px; width:100%; }
+.keyword{ color:#cba6f7; font-weight:700; } .class-name{ color:#f9e2af; font-weight:700; } .method{ color:#89b4fa; } .string{ color:#a6e3a1; } .number{ color:#fab387; } .comment{ color:#6c7086; font-style:italic; }
+.info-card { background:color-mix(in srgb,var(--accent) 7%,var(--background)); border-radius:18px; padding:34px; border:2px solid color-mix(in srgb,var(--accent) 16%,transparent); }
+.info-card h3 { color:var(--accent); font-size:36px; margin-bottom:10px; }
+.info-card p { font-size:28px; max-width:none; margin:0; }
+.analogy-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; width:100%; max-width:1320px; margin-top:20px; }
+.order-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:26px; width:100%; max-width:1480px; margin-top:20px; }
+.order-grid div { background:color-mix(in srgb,var(--accent) 8%,var(--background)); border-radius:22px; padding:38px; border-left:8px solid var(--accent); }
+.order-grid h3 { color:var(--accent); font-size:42px; }
+.order-grid p { font-family:var(--font-mono); font-size:31px; max-width:none; color:var(--foreground); }
+.practice-box, .question-box, .answer-box { max-width:1360px; padding:34px 42px; border-radius:24px; background:color-mix(in srgb,var(--accent) 8%,var(--background)); border-left:8px solid var(--accent); margin-top:14px; }
+.practice-box p, .question-box p, .answer-box p { max-width:none; font-size:34px; margin:0; }
+.answer-box { background:#f0fdf4; border-left-color:#22c55e; }
+.big-text { font-family:var(--font-display); font-size:62px; line-height:1.14; max-width:1300px; color:var(--accent-foreground)!important; }
+.big-warning { max-width:1320px; padding:34px 42px; border-radius:24px; background:#fff7ed; border-left:8px solid var(--accent); font-size:32px; line-height:1.35; color:#9a3412; margin-top:22px; }
+.output-box { font-family:var(--font-mono); font-size:42px; font-weight:800; color:var(--accent-foreground); background:rgba(0,0,0,.24); padding:32px 42px; border-radius:18px; width:max-content; max-width:100%; }
+.tree-stage { display:flex; flex-direction:column; align-items:center; gap:16px; margin-top:12px; width:100%; max-width:1320px; }
+.tree-level { display:flex; justify-content:center; gap:96px; width:100%; align-items:flex-start; }
+.tree-level.second { gap:340px; } .tree-level.third { gap:86px; }
+.tree-node { min-width:140px; min-height:86px; padding:18px 24px; border-radius:22px; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-size:36px; box-shadow:0 16px 30px rgba(0,0,0,.15); }
+.tree-node.small { min-width:116px; min-height:72px; font-size:30px; border-radius:18px; }
+.tree-label { font-family:var(--font-mono); font-size:20px; color:var(--accent); text-transform:uppercase; letter-spacing:1px; text-align:center; margin-top:8px; font-weight:800; }
+.node-wrap { display:flex; flex-direction:column; align-items:center; }
+.connector-row { height:36px; display:flex; justify-content:center; align-items:center; gap:60px; color:var(--accent); font-family:var(--font-display); font-size:48px; line-height:1; }
+.connector-row.wide { font-size:40px; gap:100px; }
+.trace-table { border-collapse:collapse; margin-top:10px; width:100%; max-width:1460px; background:rgba(255,255,255,.35); border-radius:18px; overflow:hidden; }
+.trace-table th, .trace-table td { padding:18px 22px; border-bottom:2px solid color-mix(in srgb,var(--foreground) 12%,transparent); text-align:left; font-size:26px; line-height:1.25; }
+.trace-table th { color:var(--accent); font-family:var(--font-mono); font-size:23px; text-transform:uppercase; background:color-mix(in srgb,var(--accent) 8%,var(--background)); }
+.trace-table tr:last-child td { border-bottom:none; }
+.nav-buttons { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:20; display:flex; gap:12px; align-items:center; background:rgba(250,250,250,.9); border:1px solid rgba(0,0,0,.08); border-radius:999px; padding:8px 12px; box-shadow:0 10px 30px rgba(0,0,0,.12); }
+.nav-buttons button { border:none; background:var(--accent); color:#fff; font-family:var(--font-body); font-weight:800; font-size:15px; border-radius:999px; padding:10px 18px; cursor:pointer; }
+.nav-buttons span { font-family:var(--font-mono); font-size:14px; color:var(--foreground); min-width:86px; text-align:center; }
+.keyboard-hint { position:fixed; right:20px; bottom:24px; z-index:19; font-size:13px; color:var(--muted-foreground); font-family:var(--font-body); }
+@media (max-width:900px), (max-height:560px){ .keyboard-hint{display:none;} .nav-buttons{bottom:10px;} .nav-buttons button{font-size:12px;padding:8px 12px;} }
+@media print { html,body{height:auto;overflow:visible;} .deck{height:auto;} .slide-scale{position:static;transform:none!important;width:100%;height:auto;} .slide{position:relative;opacity:1;page-break-after:always;} .nav-buttons,.keyboard-hint{display:none;} .reveal,.step{opacity:1;transform:none;} }
+</style>
+
+<style id="dsa-mobile-responsive-controls-style">
+/* Mobile presentation support: preserve animations, expose step controls, and allow zoom/pan. */
+.slide-viewport,
+.slide {
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+}
+
+.dsa-mobile-controls {
+    position: fixed;
+    left: auto;
+    right: max(2px, env(safe-area-inset-right));
+    bottom: max(2px, env(safe-area-inset-bottom));
+    z-index: 2147483000;
+    display: none;
+    width: min(224px, calc(100vw - 4px));
+    padding: 3px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 8px;
+    background: rgba(7, 12, 24, .91);
+    box-shadow: 0 6px 18px rgba(0,0,0,.34);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #f8fafc;
+    transform: none;
+    font: 700 7.5px/1 var(--font-body, system-ui, sans-serif);
+    user-select: none;
+}
+.dsa-mobile-controls__row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 2px;
+}
+.dsa-mobile-controls__row + .dsa-mobile-controls__row { margin-top: 2px; }
+.dsa-mobile-controls__row--tools {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.dsa-mobile-controls button {
+    min-width: 0;
+    min-height: 21px;
+    padding: 0 2px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 5px;
+    background: rgba(255,255,255,.09);
+    color: #fff;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    white-space: nowrap;
+}
+.dsa-mobile-controls button:hover,
+.dsa-mobile-controls button:focus-visible {
+    background: var(--accent, #f97316);
+    border-color: var(--accent, #f97316);
+    outline: none;
+}
+.dsa-mobile-controls button[data-action="reveal-step"] {
+    background: color-mix(in srgb, var(--accent, #f97316) 72%, #111827);
+    border-color: color-mix(in srgb, var(--accent, #f97316) 85%, white 15%);
+}
+.dsa-mobile-controls button:disabled { opacity: .38; cursor: not-allowed; }
+.dsa-mobile-controls__count,
+.dsa-mobile-controls__steps {
+    min-width: 30px;
+    padding: 0 1px;
+    color: #dbeafe;
+    text-align: center;
+    white-space: nowrap;
+}
+.dsa-mobile-controls__steps { font-size: 6.5px; }
+
+/* Added only to text elements whose computed color has poor contrast. */
+.dsa-force-dark-text { color: #0f172a !important; text-shadow: none !important; }
+.dsa-force-light-text { color: #f8fafc !important; text-shadow: none !important; }
+
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+    html { scroll-snap-type: y proximity !important; }
+    body { overscroll-behavior-x: none; }
+    .deck-controls { display: none !important; }
+    .keyboard-hint, .nav-dots { display: none !important; }
+    .dsa-mobile-controls { display: block !important; }
+
+    .slide-viewport {
+        height: 100vh !important;
+        height: 100dvh !important;
+        overflow: auto !important;
+        touch-action: pan-x pan-y pinch-zoom !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in srgb, var(--accent, #f97316) 65%, transparent) transparent;
+    }
+    .slide-viewport::-webkit-scrollbar { display: block; width: 5px; height: 5px; }
+    .slide-viewport::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--accent, #f97316) 65%, transparent);
+        border-radius: 999px;
+    }
+    .slide-scale {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: var(--dsa-mobile-width, 864px) !important;
+        height: var(--dsa-mobile-height, 486px) !important;
+        margin: var(--dsa-mobile-margin, 16px) auto 66px !important;
+        transform: none !important;
+        transform-origin: top left !important;
+    }
+    .slide {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: scale(var(--dsa-mobile-scale, .45)) !important;
+        transform-origin: top left !important;
+    }
+}
+
+@media (max-width: 390px) {
+    .dsa-mobile-controls {
+        right: max(2px, env(safe-area-inset-right));
+        bottom: max(2px, env(safe-area-inset-bottom));
+        width: min(210px, calc(100vw - 4px));
+        padding: 2px;
+        border-radius: 7px;
+    }
+    .dsa-mobile-controls button { min-height: 19px; padding: 0 1px; font-size: 7px; }
+    .dsa-mobile-controls__count { min-width: 28px; }
+    .dsa-mobile-controls__steps { font-size: 6px; }
+}
+
+@media print {
+    .dsa-mobile-controls { display: none !important; }
+}
+</style>
+
+
+<style id="dsa-final-compact-controls-and-contrast">
+/* Final compact navigation: keep controls out of the lesson content. */
+.deck-controls {
+  left: auto !important;
+  right: max(6px, env(safe-area-inset-right)) !important;
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  transform: none !important;
+  width: auto !important;
+  max-width: min(230px, calc(100vw - 12px)) !important;
+  min-width: 0 !important;
+  justify-content: flex-end !important;
+  gap: 3px !important;
+  padding: 3px !important;
+  border-radius: 11px !important;
+  background: color-mix(in srgb, var(--background, #fff) 90%, transparent) !important;
+  box-shadow: 0 4px 14px rgba(0,0,0,.20) !important;
+  opacity: .52 !important;
+  transition: opacity .2s ease, transform .2s ease !important;
+}
+.deck-controls:hover,
+.deck-controls:focus-within { opacity: 1 !important; }
+.deck-controls button {
+  min-width: 0 !important;
+  min-height: 25px !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+.deck-controls .deck-count {
+  min-width: 36px !important;
+  padding: 0 2px !important;
+  font-size: 9px !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+/* The touch/animation panel stays compact and anchored at the bottom-right. */
+.dsa-mobile-controls {
+  left: auto !important;
+  right: max(3px, env(safe-area-inset-right)) !important;
+  bottom: max(3px, env(safe-area-inset-bottom)) !important;
+  width: min(178px, calc(100vw - 6px)) !important;
+  padding: 2px !important;
+  border-radius: 7px !important;
+  box-shadow: 0 3px 12px rgba(0,0,0,.28) !important;
+  font-size: 6.5px !important;
+  opacity: .76 !important;
+}
+.dsa-mobile-controls:hover,
+.dsa-mobile-controls:focus-within { opacity: 1 !important; }
+.dsa-mobile-controls__row { gap: 1px !important; }
+.dsa-mobile-controls__row + .dsa-mobile-controls__row { margin-top: 1px !important; }
+.dsa-mobile-controls button {
+  min-height: 17px !important;
+  padding: 0 1px !important;
+  border-radius: 4px !important;
+  font-size: 6.5px !important;
+}
+.dsa-mobile-controls__count {
+  min-width: 25px !important;
+  padding: 0 !important;
+  font-size: 6.5px !important;
+}
+.dsa-mobile-controls__steps {
+  min-height: 7px !important;
+  padding-top: 1px !important;
+  font-size: 5.5px !important;
+  line-height: 1 !important;
+}
+
+/* Classes assigned by the contrast checker below. */
+.dsa-final-dark-text,
+.dsa-final-dark-text * { color: #111827 !important; text-shadow: none !important; }
+.dsa-final-light-text,
+.dsa-final-light-text * { color: #f8fafc !important; text-shadow: none !important; }
+
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+  /* The richer touch panel replaces the simple Previous/Next bar on mobile. */
+  .deck-controls { display: none !important; }
+  .slide-scale { margin-bottom: 50px !important; }
+}
+
+@media (max-width: 390px) {
+  .dsa-mobile-controls {
+    width: min(166px, calc(100vw - 6px)) !important;
+    right: max(3px, env(safe-area-inset-right)) !important;
+    bottom: max(3px, env(safe-area-inset-bottom)) !important;
+  }
+  .dsa-mobile-controls button { min-height: 16px !important; font-size: 6px !important; }
+  .dsa-mobile-controls__count { min-width: 23px !important; font-size: 6px !important; }
+}
+
+@media print {
+  .deck-controls, .dsa-mobile-controls { display: none !important; }
+}
+</style>
+
+
+<style id="dsa-uniform-presentation-size">
+/* Use one consistent fit-to-screen size across every lesson. */
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+  .slide-viewport {
+    overflow: auto !important;
+    overscroll-behavior: contain !important;
+  }
+  .slide-scale {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-bottom: 46px !important;
+  }
+}
+@media print {
+  .slide-scale { margin: 0 !important; }
+}
+</style>
+
+
+
+<style id="dsa-controls-match-presentation-one">
+/* Keep every presentation's navigation as compact as Presentation 1. */
+.deck-controls,
+.nav-buttons {
+  position: fixed !important;
+  left: auto !important;
+  right: max(6px, env(safe-area-inset-right)) !important;
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+  transform: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  width: auto !important;
+  max-width: min(172px, calc(100vw - 12px)) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 31px !important;
+  gap: 2px !important;
+  margin: 0 !important;
+  padding: 2px !important;
+  box-sizing: border-box !important;
+  border-radius: 9px !important;
+  overflow: hidden !important;
+  opacity: .68 !important;
+  z-index: 2147483000 !important;
+}
+.deck-controls:hover,
+.deck-controls:focus-within,
+.nav-buttons:hover,
+.nav-buttons:focus-within { opacity: 1 !important; }
+.deck-controls > button,
+.deck-controls button,
+.nav-buttons > button,
+.nav-buttons button {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  height: 23px !important;
+  margin: 0 !important;
+  padding: 2px 6px !important;
+  border-radius: 7px !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+.deck-controls > span,
+.deck-controls .deck-count,
+.deck-controls #deckCounter,
+.deck-controls #deckCount,
+.nav-buttons > span,
+.nav-buttons #counter {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 31px !important;
+  max-width: 43px !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 1px !important;
+  font-size: 8px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+/* Keep the touch animation panel equally unobtrusive. */
+.dsa-mobile-controls {
+  left: auto !important;
+  right: max(4px, env(safe-area-inset-right)) !important;
+  bottom: max(4px, env(safe-area-inset-bottom)) !important;
+  width: min(158px, calc(100vw - 8px)) !important;
+  max-width: 158px !important;
+  padding: 2px !important;
+  border-radius: 7px !important;
+  opacity: .78 !important;
+}
+.dsa-mobile-controls__row { gap: 1px !important; }
+.dsa-mobile-controls__row + .dsa-mobile-controls__row { margin-top: 1px !important; }
+.dsa-mobile-controls button {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 15px !important;
+  padding: 0 2px !important;
+  border-radius: 4px !important;
+  font-size: 6px !important;
+  line-height: 1 !important;
+}
+.dsa-mobile-controls__count {
+  min-width: 22px !important;
+  font-size: 6px !important;
+  line-height: 1 !important;
+}
+.dsa-mobile-controls__steps {
+  min-height: 0 !important;
+  padding-top: 1px !important;
+  font-size: 5px !important;
+  line-height: 1 !important;
+}
+
+@media (max-width: 1024px), (hover: none), (pointer: coarse) {
+  .deck-controls, .nav-buttons { display: none !important; }
+  .slide-scale { margin-bottom: 43px !important; }
+}
+@media print {
+  .deck-controls, .nav-buttons, .dsa-mobile-controls { display: none !important; }
+}
+</style>
+
+</head>
+<body>
+<!-- Student copy: instructor-only answer reveals removed. -->
+<div class="deck"><div class="slide-scale">
+
+<section class="slide slide-dark">
+  <span class="section-number" style="color: color-mix(in srgb, var(--accent) 25%, transparent);">28</span>
+  <span class="eyebrow reveal d1">Module 6 · Lesson 28</span>
+  <h1 class="reveal d2" style="font-size: 95px;">Tree<br>Traversals</h1>
+  <p class="reveal d3" style="margin-top: 30px;">Learning how to visit every node in a tree, one clear order at a time.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">01</span>
+  <span class="eyebrow reveal d1">Today's Goals</span>
+  <h2 class="reveal d2">What You Will Learn</h2>
+  <ul><li class="step">What tree traversal means in simple words</li><li class="step">How to read a tree using left, root, and right directions</li><li class="step">How inorder traversal works first</li><li class="step">How preorder and postorder are different</li><li class="step">Why inorder traversal of a BST gives sorted values</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">02</span>
+  <span class="eyebrow reveal d1">Before We Start</span>
+  <h2 class="reveal d2">Warm-Up Review</h2>
+  <ul><li class="step">What is the top node of a tree called?</li><li class="step">What do we call a node with no children?</li><li class="step">In a binary tree, how many children can each node have?</li><li class="step">Point to the left child and right child in this diagram.</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">03</span>
+  <span class="eyebrow reveal d1">Review</span>
+  <h2 class="reveal d2">Quick Reminder: Binary Tree</h2>
+  <p class="reveal d3">A binary tree is a structure where each node can have at most <span class="highlight">two children</span>.</p><div class="tree-stage reveal d3">
+  <div class="tree-level"><div class="node-wrap"><div class="tree-node">10</div><div class="tree-label">root</div></div></div>
+  <div class="connector-row">↙ &nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+  <div class="tree-level second">
+    <div class="node-wrap"><div class="tree-node">5</div><div class="tree-label">left child</div></div>
+    <div class="node-wrap"><div class="tree-node">15</div><div class="tree-label">right child</div></div>
+  </div>
+  <div class="connector-row wide">↙ ↘ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↙ ↘</div>
+  <div class="tree-level third">
+    <div class="node-wrap"><div class="tree-node small">3</div><div class="tree-label">leaf</div></div>
+    <div class="node-wrap"><div class="tree-node small">7</div><div class="tree-label">leaf</div></div>
+    <div class="node-wrap"><div class="tree-node small">12</div><div class="tree-label">leaf</div></div>
+    <div class="node-wrap"><div class="tree-node small">18</div><div class="tree-label">leaf</div></div>
+  </div>
+</div>
+</section>
+
+<section class="slide slide-accent">
+  <span class="section-number">04</span>
+  <span class="eyebrow reveal d1">Main Idea</span>
+  <h2 class="reveal d2">Today's Big Question</h2>
+  <p class="reveal d3 big-text">If a tree has many nodes, how do we make Java visit them all?</p><div class="practice-box reveal d4"><p>Answer: we follow a <strong>traversal order</strong>.</p></div>
+</section>
+
+<section class="slide ">
+  <span class="section-number">05</span>
+  <span class="eyebrow reveal d1">Simple Definition</span>
+  <h2 class="reveal d2">What Is Traversal?</h2>
+  <p class="reveal d3">Traversal means <span class="highlight">visiting every node</span> in a data structure.</p><div class="analogy-grid reveal d4"><div class="info-card"><h3>Real Life</h3><p>Checking every room in a building</p></div><div class="info-card"><h3>In Trees</h3><p>Checking every node using a clear order</p></div></div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Traversal is a systematic way to visit every reachable node exactly in a chosen order.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">06</span>
+  <span class="eyebrow reveal d1">Purpose</span>
+  <h2 class="reveal d2">Why Do We Traverse Trees?</h2>
+  <ul><li class="step">To display all values stored in the tree</li><li class="step">To search, count, or process nodes</li><li class="step">To copy or delete the tree properly</li><li class="step">To convert tree data into a list-like order</li><li class="step">To understand how tree algorithms move</li></ul>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Trees have no single next position, so traversal rules determine which branch is processed first.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">07</span>
+  <span class="eyebrow reveal d1">Traversal Types</span>
+  <h2 class="reveal d2">The Three Main Orders</h2>
+  <div class="order-grid reveal d3"><div><h3>Inorder</h3><p>Left → Root → Right</p></div><div><h3>Preorder</h3><p>Root → Left → Right</p></div><div><h3>Postorder</h3><p>Left → Right → Root</p></div></div><p class="reveal d4">Same tree, different visiting order.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">The order names describe when the root is processed relative to the left and right subtrees.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">08</span>
+  <span class="eyebrow reveal d1">Sample Tree</span>
+  <h2 class="reveal d2">Meet Our Practice Tree</h2>
+  <div class="tree-stage reveal d3">
+  <div class="tree-level"><div class="node-wrap"><div class="tree-node">10</div><div class="tree-label">root</div></div></div>
+  <div class="connector-row">↙ &nbsp;&nbsp;&nbsp;&nbsp; ↘</div>
+  <div class="tree-level second">
+    <div class="node-wrap"><div class="tree-node">5</div><div class="tree-label">left child</div></div>
+    <div class="node-wrap"><div class="tree-node">15</div><div class="tree-label">right child</div></div>
+  </div>
+  <div class="connector-row wide">↙ ↘ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ↙ ↘</div>
+  <div class="tree-level third">
+    <div class="node-wrap"><div class="tree-node small">3</div><div class="tree-label">leaf</div></div>
+    <div class="node-wrap"><div class="tree-node small">7</div><div class="tree-label">leaf</div></div>
+    <div class="node-wrap"><div class="tree-node small">12</div><div class="tree-label">leaf</div></div>
+    <div class="node-wrap"><div class="tree-node small">18</div><div class="tree-label">leaf</div></div>
+  </div>
+</div><p class="reveal d4" style="margin-top:20px;">We will use this same tree for most examples today.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">09</span>
+  <span class="eyebrow reveal d1">Memory Aid</span>
+  <h2 class="reveal d2">Think of It Like Instructions</h2>
+  <div class="practice-box reveal d3"><p><strong>Inorder:</strong> Go left first, print the current node, then go right.</p></div><div class="practice-box reveal d4"><p><strong>Preorder:</strong> Print first, then go left, then go right.</p></div><div class="practice-box reveal d5"><p><strong>Postorder:</strong> Go left, go right, then print last.</p></div>
+</section>
+
+<section class="slide ">
+  <span class="section-number">10</span>
+  <span class="eyebrow reveal d1">Needed Idea</span>
+  <h2 class="reveal d2">Important Word: Recursion</h2>
+  <p class="reveal d3">Traversal is usually written using <span class="highlight">recursion</span>.</p><div class="practice-box reveal d4"><p>A recursive method is a method that calls itself to solve a smaller part of the same problem.</p></div><p class="reveal d5">Do not worry. Today, we will trace it slowly.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Each recursive call solves the same traversal problem for one smaller subtree.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">11</span>
+  <span class="eyebrow reveal d1">Base Case</span>
+  <h2 class="reveal d2">The Stop Rule</h2>
+  <pre class="code-block code-compact"><code><span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+    <span class="keyword">return</span>;
+}</code></pre><p class="reveal d4">This means: if there is no node, stop and go back.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">When the current node is null, that branch is empty and the method returns without accessing fields.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">12</span>
+  <span class="eyebrow reveal d1">Code Pattern</span>
+  <h2 class="reveal d2">Traversal Method Shape</h2>
+  <pre class="code-block code-med"><code><span class="keyword">static</span> <span class="keyword">void</span> <span class="method">traversal</span>(<span class="class-name">TreeNode</span> node) {
+    <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+        <span class="keyword">return</span>;
+    }
+
+    <span class="comment">// visit left side</span>
+    <span class="comment">// print current node</span>
+    <span class="comment">// visit right side</span>
+}</code></pre><p class="reveal d4">Only the order of these three actions changes.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Every traversal combines a root action with recursive visits to the left and right children.</p>
+</section>
+
+<section class="slide slide-dark">
+  <span class="section-number">13</span>
+  <span class="eyebrow reveal d1">Traversal 1</span>
+  <h2 class="reveal d2">Start with Inorder</h2>
+  <h1 class="reveal d3" style="font-size:88px;color:var(--accent);">Left → Root → Right</h1><p class="reveal d4">For beginners, this is the most important traversal to understand first.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Inorder processes the entire left subtree, then the root, then the entire right subtree.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">14</span>
+  <span class="eyebrow reveal d1">Slow Explanation</span>
+  <h2 class="reveal d2">Inorder in Plain English</h2>
+  <ul><li class="step">Go to the left child first</li><li class="step">When there is no more left child, print the current node</li><li class="step">Then go to the right child</li><li class="step">Repeat the same rule for every small subtree</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">15</span>
+  <span class="eyebrow reveal d1">Before Java</span>
+  <h2 class="reveal d2">Inorder Pseudocode</h2>
+  <pre class="code-block code-med"><code><span class="method">inorder</span>(node)
+    <span class="keyword">if</span> node is <span class="keyword">null</span>
+        stop
+    <span class="method">inorder</span>(node.left)
+    print node.data
+    <span class="method">inorder</span>(node.right)</code></pre><p class="reveal d4">This is not Java yet. This is the idea before coding.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">16</span>
+  <span class="eyebrow reveal d1">Core Code</span>
+  <h2 class="reveal d2">Inorder Java Code</h2>
+  <pre class="code-block code-med"><code><span class="keyword">static</span> <span class="keyword">void</span> <span class="method">inorder</span>(<span class="class-name">TreeNode</span> node) {
+    <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+        <span class="keyword">return</span>;
+    }
+
+    <span class="method">inorder</span>(node.left);
+    System.out.<span class="method">println</span>(node.data);
+    <span class="method">inorder</span>(node.right);
+}</code></pre>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">The print statement belongs between the two recursive calls because the root is visited second.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">17</span>
+  <span class="eyebrow reveal d1">Trace Practice</span>
+  <h2 class="reveal d2">Trace Inorder by Hand</h2>
+  <table class="trace-table reveal d3"><tr><th>Step</th><th>Action</th><th>Printed?</th></tr><tr><td>1</td><td>Start at 10, go left to 5</td><td>No</td></tr><tr><td>2</td><td>At 5, go left to 3</td><td>No</td></tr><tr><td>3</td><td>3 has no left child</td><td>Print 3</td></tr><tr><td>4</td><td>Go back to 5</td><td>Print 5</td></tr><tr><td>5</td><td>Go right to 7</td><td>Print 7</td></tr></table>
+</section>
+
+<section class="slide slide-accent">
+  <span class="section-number">18</span>
+  <span class="eyebrow reveal d1">Expected Result</span>
+  <h2 class="reveal d2">Inorder Output</h2>
+  <div class="output-box reveal d3">3 5 7 10 12 15 18</div><p class="reveal d4">Notice: the values appear in ascending order because our tree is a Binary Search Tree.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">19</span>
+  <span class="eyebrow reveal d1">Key Connection</span>
+  <h2 class="reveal d2">Why Inorder Gives Sorted Values</h2>
+  <p class="reveal d3">In a Binary Search Tree:</p><ul><li class="step">Smaller values are on the left side</li><li class="step">Larger values are on the right side</li><li class="step">Inorder reads left first, then root, then right</li><li class="step">So it naturally reads from smallest to largest</li></ul>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Inorder produces sorted output only when the tree also satisfies the binary-search-tree ordering rule.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">20</span>
+  <span class="eyebrow reveal d1">Understanding Check</span>
+  <h2 class="reveal d2">Mini Check</h2>
+  <div class="question-box reveal d3"><p>If the tree is a Binary Search Tree, what traversal usually produces sorted output?</p></div>
+</section>
+
+<section class="slide slide-dark">
+  <span class="section-number">21</span>
+  <span class="eyebrow reveal d1">Traversal 2</span>
+  <h2 class="reveal d2">Now Preorder</h2>
+  <h1 class="reveal d3" style="font-size:88px;color:var(--accent);">Root → Left → Right</h1><p class="reveal d4">Preorder prints the node before visiting its children.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Preorder handles the root before either subtree, which records the parent before its descendants.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">22</span>
+  <span class="eyebrow reveal d1">Slow Explanation</span>
+  <h2 class="reveal d2">Preorder in Plain English</h2>
+  <ul><li class="step">Print the current node first</li><li class="step">Then visit the left subtree</li><li class="step">Then visit the right subtree</li><li class="step">Useful when you want to process the parent before the children</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">23</span>
+  <span class="eyebrow reveal d1">Core Code</span>
+  <h2 class="reveal d2">Preorder Java Code</h2>
+  <pre class="code-block code-med"><code><span class="keyword">static</span> <span class="keyword">void</span> <span class="method">preorder</span>(<span class="class-name">TreeNode</span> node) {
+    <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+        <span class="keyword">return</span>;
+    }
+
+    System.out.<span class="method">println</span>(node.data);
+    <span class="method">preorder</span>(node.left);
+    <span class="method">preorder</span>(node.right);
+}</code></pre>
+</section>
+
+<section class="slide slide-accent">
+  <span class="section-number">24</span>
+  <span class="eyebrow reveal d1">Expected Result</span>
+  <h2 class="reveal d2">Preorder Output</h2>
+  <div class="output-box reveal d3">10 5 3 7 15 12 18</div><p class="reveal d4">The root appears first because preorder prints before going down.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">25</span>
+  <span class="eyebrow reveal d1">Where It Helps</span>
+  <h2 class="reveal d2">Preorder Use Case</h2>
+  <div class="analogy-grid reveal d3"><div class="info-card"><h3>Tree Copy</h3><p>Create the root before creating its children.</p></div><div class="info-card"><h3>File Systems</h3><p>Show the folder before showing files inside it.</p></div></div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Preorder is useful for copying tree structure or producing prefix-style representations.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">26</span>
+  <span class="eyebrow reveal d1">Understanding Check</span>
+  <h2 class="reveal d2">Mini Check</h2>
+  <div class="question-box reveal d3"><p>Which traversal prints the root first?</p></div>
+</section>
+
+<section class="slide slide-dark">
+  <span class="section-number">27</span>
+  <span class="eyebrow reveal d1">Traversal 3</span>
+  <h2 class="reveal d2">Now Postorder</h2>
+  <h1 class="reveal d3" style="font-size:88px;color:var(--accent);">Left → Right → Root</h1><p class="reveal d4">Postorder prints the node after visiting its children.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Postorder processes both subtrees before the root, so children are handled before their parent.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">28</span>
+  <span class="eyebrow reveal d1">Slow Explanation</span>
+  <h2 class="reveal d2">Postorder in Plain English</h2>
+  <ul><li class="step">Visit the left subtree first</li><li class="step">Visit the right subtree next</li><li class="step">Print the current node last</li><li class="step">Useful when children must be processed before the parent</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">29</span>
+  <span class="eyebrow reveal d1">Core Code</span>
+  <h2 class="reveal d2">Postorder Java Code</h2>
+  <pre class="code-block code-med"><code><span class="keyword">static</span> <span class="keyword">void</span> <span class="method">postorder</span>(<span class="class-name">TreeNode</span> node) {
+    <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+        <span class="keyword">return</span>;
+    }
+
+    <span class="method">postorder</span>(node.left);
+    <span class="method">postorder</span>(node.right);
+    System.out.<span class="method">println</span>(node.data);
+}</code></pre>
+</section>
+
+<section class="slide slide-accent">
+  <span class="section-number">30</span>
+  <span class="eyebrow reveal d1">Expected Result</span>
+  <h2 class="reveal d2">Postorder Output</h2>
+  <div class="output-box reveal d3">3 7 5 12 18 15 10</div><p class="reveal d4">The root is printed last because postorder finishes children first.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">31</span>
+  <span class="eyebrow reveal d1">Where It Helps</span>
+  <h2 class="reveal d2">Postorder Use Case</h2>
+  <div class="analogy-grid reveal d3"><div class="info-card"><h3>Deleting a Tree</h3><p>Delete children first before deleting the parent.</p></div><div class="info-card"><h3>Expression Trees</h3><p>Compute smaller parts before the final operation.</p></div></div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Postorder fits tasks such as deleting a tree or calculating results that depend on both children first.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">32</span>
+  <span class="eyebrow reveal d1">Big Comparison</span>
+  <h2 class="reveal d2">Compare the Three Orders</h2>
+  <table class="trace-table reveal d3"><tr><th>Traversal</th><th>Rule</th><th>Output</th></tr><tr><td>Inorder</td><td>Left → Root → Right</td><td>3 5 7 10 12 15 18</td></tr><tr><td>Preorder</td><td>Root → Left → Right</td><td>10 5 3 7 15 12 18</td></tr><tr><td>Postorder</td><td>Left → Right → Root</td><td>3 7 5 12 18 15 10</td></tr></table>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">The same nodes are visited in every traversal; only the position of the root action changes.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">33</span>
+  <span class="eyebrow reveal d1">Important Reminder</span>
+  <h2 class="reveal d2">One Tree, Three Stories</h2>
+  <p class="reveal d3">Traversal does not change the tree.</p><div class="practice-box reveal d4"><p>It only changes the <strong>order</strong> in which we visit or print the nodes.</p></div><p class="reveal d5">Same data. Different reading pattern.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">34</span>
+  <span class="eyebrow reveal d1">Java Setup</span>
+  <h2 class="reveal d2">Build the TreeNode Class</h2>
+  <pre class="code-block code-med"><code><span class="keyword">class</span> <span class="class-name">TreeNode</span> {
+    <span class="keyword">int</span> data;
+    <span class="class-name">TreeNode</span> left;
+    <span class="class-name">TreeNode</span> right;
+
+    <span class="class-name">TreeNode</span>(<span class="keyword">int</span> data) {
+        <span class="keyword">this</span>.data = data;
+    }
+}</code></pre><p class="reveal d4">This is the same node idea from Lesson 27.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">35</span>
+  <span class="eyebrow reveal d1">Manual Links</span>
+  <h2 class="reveal d2">Build the Sample Tree</h2>
+  <pre class="code-block code-med"><code><span class="class-name">TreeNode</span> root = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">10</span>);
+root.left = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">5</span>);
+root.right = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">15</span>);
+
+root.left.left = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">3</span>);
+root.left.right = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">7</span>);
+root.right.left = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">12</span>);
+root.right.right = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">18</span>);</code></pre>
+</section>
+
+<section class="slide ">
+  <span class="section-number">36</span>
+  <span class="eyebrow reveal d1">Complete Methods</span>
+  <h2 class="reveal d2">Traversal Methods Together</h2>
+  <pre class="code-block code-fit"><code><span class="keyword">class</span> <span class="class-name">TreeNode</span> {
+    <span class="keyword">int</span> data;
+    <span class="class-name">TreeNode</span> left;
+    <span class="class-name">TreeNode</span> right;
+
+    <span class="class-name">TreeNode</span>(<span class="keyword">int</span> data) {
+        <span class="keyword">this</span>.data = data;
+    }
+}
+
+<span class="keyword">public</span> <span class="keyword">class</span> <span class="class-name">Main</span> {
+    <span class="keyword">static</span> <span class="keyword">void</span> <span class="method">inorder</span>(<span class="class-name">TreeNode</span> node) {
+        <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+            <span class="keyword">return</span>;
+        }
+        <span class="method">inorder</span>(node.left);
+        System.out.<span class="method">print</span>(node.data + <span class="string">&quot; &quot;</span>);
+        <span class="method">inorder</span>(node.right);
+    }
+
+    <span class="keyword">static</span> <span class="keyword">void</span> <span class="method">preorder</span>(<span class="class-name">TreeNode</span> node) {
+        <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+            <span class="keyword">return</span>;
+        }
+        System.out.<span class="method">print</span>(node.data + <span class="string">&quot; &quot;</span>);
+        <span class="method">preorder</span>(node.left);
+        <span class="method">preorder</span>(node.right);
+    }
+
+    <span class="keyword">static</span> <span class="keyword">void</span> <span class="method">postorder</span>(<span class="class-name">TreeNode</span> node) {
+        <span class="keyword">if</span> (node == <span class="keyword">null</span>) {
+            <span class="keyword">return</span>;
+        }
+        <span class="method">postorder</span>(node.left);
+        <span class="method">postorder</span>(node.right);
+        System.out.<span class="method">print</span>(node.data + <span class="string">&quot; &quot;</span>);
+    }
+}</code></pre>
+</section>
+
+<section class="slide ">
+  <span class="section-number">37</span>
+  <span class="eyebrow reveal d1">Run It</span>
+  <h2 class="reveal d2">Add the main Method</h2>
+  <pre class="code-block code-fit"><code><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="method">main</span>(<span class="keyword">String</span>[] args) {
+    <span class="class-name">TreeNode</span> root = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">10</span>);
+    root.left = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">5</span>);
+    root.right = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">15</span>);
+    root.left.left = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">3</span>);
+    root.left.right = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">7</span>);
+    root.right.left = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">12</span>);
+    root.right.right = <span class="keyword">new</span> <span class="class-name">TreeNode</span>(<span class="number">18</span>);
+
+    System.out.<span class="method">print</span>(<span class="string">&quot;Inorder: &quot;</span>);
+    <span class="method">inorder</span>(root);
+
+    System.out.<span class="method">print</span>(<span class="string">&quot;
+Preorder: &quot;</span>);
+    <span class="method">preorder</span>(root);
+
+    System.out.<span class="method">print</span>(<span class="string">&quot;
+Postorder: &quot;</span>);
+    <span class="method">postorder</span>(root);
+}</code></pre>
+</section>
+
+<section class="slide slide-accent">
+  <span class="section-number">38</span>
+  <span class="eyebrow reveal d1">Check Your Output</span>
+  <h2 class="reveal d2">Expected Program Output</h2>
+  <div class="output-box reveal d3" style="font-size:34px;line-height:1.8;">Inorder: 3 5 7 10 12 15 18<br>Preorder: 10 5 3 7 15 12 18<br>Postorder: 3 7 5 12 18 15 10</div>
+</section>
+
+<section class="slide ">
+  <span class="section-number">39</span>
+  <span class="eyebrow reveal d1">Hands On</span>
+  <h2 class="reveal d2">Copy and Run Activity</h2>
+  <ul><li class="step">Open OnlineGDB Java Compiler</li><li class="step">Type or paste the complete traversal program</li><li class="step">Run the program</li><li class="step">Compare your output with the expected output</li><li class="step">Fix one error at a time if it does not run</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">40</span>
+  <span class="eyebrow reveal d1">Experiment</span>
+  <h2 class="reveal d2">Change One Thing</h2>
+  <div class="practice-box reveal d3"><p>Change the root value from <strong>10</strong> to <strong>20</strong>.</p></div><div class="practice-box reveal d4"><p>Run again. Which output positions changed?</p></div><div class="practice-box reveal d5"><p>Then change one leaf value and observe the output.</p></div>
+</section>
+
+<section class="slide ">
+  <span class="section-number">41</span>
+  <span class="eyebrow reveal d1">Work Together</span>
+  <h2 class="reveal d2">Guided Practice</h2>
+  <div class="question-box reveal d3"><p>Use this tree: root 8, left 4, right 10, left-left 2, left-right 6.</p></div><p class="reveal d4">Together, write the inorder output first.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">42</span>
+  <span class="eyebrow reveal d1">Your Turn</span>
+  <h2 class="reveal d2">Independent Exercise</h2>
+  <ul><li class="step">Create a tree with at least 5 nodes</li><li class="step">Print the inorder traversal</li><li class="step">Print the preorder traversal</li><li class="step">Print the postorder traversal</li><li class="step">Write one sentence explaining which traversal prints the root first</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">43</span>
+  <span class="eyebrow reveal d1">Debugging</span>
+  <h2 class="reveal d2">Common Error: Forgetting null Check</h2>
+  <pre class="code-block code-med"><code><span class="comment">// Dangerous: no stop rule</span>
+<span class="keyword">static</span> <span class="keyword">void</span> <span class="method">inorder</span>(<span class="class-name">TreeNode</span> node) {
+    <span class="method">inorder</span>(node.left);
+    System.out.<span class="method">println</span>(node.data);
+    <span class="method">inorder</span>(node.right);
+}</code></pre><div class="big-warning reveal d4">Always check if node is null before reading node.left or node.right.</div>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Without the null base case, recursion eventually tries to access fields through a missing child.</p>
+</section>
+
+<section class="slide ">
+  <span class="section-number">44</span>
+  <span class="eyebrow reveal d1">Debugging</span>
+  <h2 class="reveal d2">Common Error: Wrong Order</h2>
+  <pre class="code-block code-compact"><code><span class="comment">// This is preorder, not inorder</span>
+System.out.<span class="method">println</span>(node.data);
+<span class="method">inorder</span>(node.left);
+<span class="method">inorder</span>(node.right);</code></pre><p class="reveal d4">Small order changes create a different traversal.</p>
+
+<p class="student-copy-detail reveal d5" style="font-size: 24px; line-height: 1.4; margin-top: 18px; max-width: 1320px;">Moving the root action changes the traversal type even when the recursive calls stay the same.</p>
+</section>
+
+<section class="slide slide-dark">
+  <span class="section-number">45</span>
+  <span class="eyebrow reveal d1">Recap</span>
+  <h2 class="reveal d2">Summary</h2>
+  <ul><li class="step">Traversal means visiting every node in a tree</li><li class="step">Inorder is Left → Root → Right</li><li class="step">Preorder is Root → Left → Right</li><li class="step">Postorder is Left → Right → Root</li><li class="step">Inorder traversal of a BST produces sorted values</li></ul>
+</section>
+
+<section class="slide ">
+  <span class="section-number">46</span>
+  <span class="eyebrow reveal d1">Before You Leave</span>
+  <h2 class="reveal d2">Exit Check</h2>
+  <div class="question-box reveal d3"><p>What is the difference between inorder, preorder, and postorder traversal?</p></div><div class="question-box reveal d4"><p>Why does inorder traversal of a Binary Search Tree produce sorted values?</p></div><div class="question-box reveal d5"><p>Which traversal prints the root last?</p></div>
+</section>
+
+<section class="slide ">
+  <span class="section-number">47</span>
+  <span class="eyebrow reveal d1">Coming Up</span>
+  <h2 class="reveal d2">Next Lesson</h2>
+  <h3 class="reveal d3" style="color:var(--accent);font-size:56px;">Lesson 29: Binary Search Trees</h3><p class="reveal d4">Next, we will learn the rule: smaller values go left, larger values go right.</p>
+</section>
+
+</div></div>
+<div class="nav-buttons">
+  <button id="prevBtn">← Previous</button><span id="counter">1 / 1</span><button id="nextBtn">Next →</button>
+</div>
+<div class="keyboard-hint">← → navigate · Space step · F fullscreen</div>
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let current = 0;
+  function scale(){ document.querySelector('.slide-scale').style.setProperty('--slide-scale', Math.min(innerWidth/1920, innerHeight/1080)); }
+  function show(i){
+    current = Math.max(0, Math.min(slides.length-1, i));
+    slides.forEach((s,idx)=>{ s.classList.toggle('active', idx===current); if(idx!==current){ s.querySelectorAll('.step').forEach(e=>e.classList.remove('show')); }});
+    const active = slides[current];
+    active.querySelectorAll('.reveal').forEach(e=>e.classList.add('show'));
+    document.getElementById('counter').textContent = (current+1)+' / '+slides.length;
+    document.getElementById('prevBtn').disabled = current===0;
+    document.getElementById('nextBtn').disabled = current===slides.length-1;
+  }
+  function advance(){
+    const step = slides[current].querySelector('.step:not(.show)');
+    if(step){ step.classList.add('show'); return; }
+    show(current+1);
+  }
+  function retreat(){
+    const shown = slides[current].querySelectorAll('.step.show');
+    if(shown.length){ shown[shown.length-1].classList.remove('show'); return; }
+    show(current-1);
+  }
+  document.getElementById('nextBtn').addEventListener('click', advance);
+  document.getElementById('prevBtn').addEventListener('click', retreat);
+  document.addEventListener('keydown', e=>{
+    if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+    if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){ e.preventDefault(); advance(); }
+    if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ e.preventDefault(); retreat(); }
+    if(e.key==='Home'){ e.preventDefault(); show(0); }
+    if(e.key==='End'){ e.preventDefault(); show(slides.length-1); }
+    if(e.key==='f'||e.key==='F'){ e.preventDefault(); if(!document.fullscreenElement) document.documentElement.requestFullscreen?.(); else document.exitFullscreen?.(); }
+  });
+  let startX=0,startY=0;
+  document.addEventListener('touchstart',e=>{ if(e.touches.length===1){startX=e.touches[0].clientX;startY=e.touches[0].clientY;} },{passive:true});
+  document.addEventListener('touchend',e=>{ const dx=e.changedTouches[0].clientX-startX, dy=e.changedTouches[0].clientY-startY; if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.2){ dx<0?advance():retreat(); } },{passive:true});
+  addEventListener('resize', scale); scale(); show(0);
+  window.slides = { next:advance, prev:retreat, goTo:show };
+})();
+</script>
+
+<script id="dsa-mobile-responsive-controls-script">
+(function () {
+    'use strict';
+
+    const MOBILE_QUERY = '(max-width: 1024px), (hover: none), (pointer: coarse)';
+    const CANVAS_W = 1920;
+    const CANVAS_H = 1080;
+    let scaleMode = 'reading';
+    let customScale = null;
+    let touchStartedInSlide = false;
+
+    function isMobile() { return window.matchMedia(MOBILE_QUERY).matches; }
+    function slidesArray() {
+        return window.slides?.slides || Array.from(document.querySelectorAll('.slide'));
+    }
+    function currentIndex() {
+        const deck = window.slides;
+        if (deck && Number.isInteger(deck.currentSlide)) return deck.currentSlide;
+        const hash = location.hash.replace(/^#/, '');
+        const slides = slidesArray();
+        const index = slides.findIndex((slide) => slide.id === hash);
+        return index >= 0 ? index : 0;
+    }
+    function currentSlide() {
+        const slides = slidesArray();
+        return slides[Math.max(0, Math.min(slides.length - 1, currentIndex()))] || null;
+    }
+
+    function ensureCurrentSlideReveals() {
+        const deck = window.slides;
+        const slide = currentSlide();
+        if (!slide) return;
+        document.documentElement.classList.add('reveals-ready');
+        slide.classList.add('visible');
+        if (deck && typeof deck._playSlideReveals === 'function') {
+            try { deck._playSlideReveals(slide); } catch (_) {}
+        } else {
+            slide.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale,.reveal-blur').forEach((el) => {
+                el.style.opacity = el._targetOpacity ?? '1';
+                el.style.visibility = 'visible';
+                el.style.transform = 'none';
+                el.style.filter = 'none';
+            });
+        }
+    }
+
+    function stepState() {
+        const slide = currentSlide();
+        const all = slide ? Array.from(slide.querySelectorAll('.step')) : [];
+        const shown = all.filter((el) => el.classList.contains('step-shown'));
+        const hidden = all.filter((el) => !el.classList.contains('step-shown'));
+        return { slide, all, shown, hidden };
+    }
+
+    function revealElement(el, delay) {
+        if (!el) return;
+        const deck = window.slides;
+        el.classList.add('step-shown');
+        if (deck && typeof deck._playReveal === 'function') {
+            try { deck._playReveal(el, delay || 0); return; } catch (_) {}
+        }
+        el.style.opacity = el._targetOpacity ?? '1';
+        el.style.visibility = 'visible';
+        el.style.transform = 'none';
+        el.style.filter = 'none';
+    }
+
+    function hideElement(el) {
+        if (!el) return;
+        const deck = window.slides;
+        el.classList.remove('step-shown');
+        if (deck && typeof deck._cancelReveal === 'function') {
+            try { deck._cancelReveal(el); } catch (_) {}
+        }
+        if (deck && typeof deck._applyHiddenStyle === 'function') {
+            try { deck._applyHiddenStyle(el); return; } catch (_) {}
+        }
+        el.style.opacity = '0';
+        el.style.visibility = 'hidden';
+    }
+
+    function revealNextStep() {
+        ensureCurrentSlideReveals();
+        const { hidden } = stepState();
+        if (hidden[0]) revealElement(hidden[0], 0);
+        setTimeout(updateControls, 80);
+    }
+
+    function hidePreviousStep() {
+        const { shown } = stepState();
+        if (shown.length) hideElement(shown[shown.length - 1]);
+        setTimeout(updateControls, 50);
+    }
+
+    function revealAllSteps() {
+        ensureCurrentSlideReveals();
+        const { hidden } = stepState();
+        hidden.forEach((el, index) => setTimeout(() => {
+            revealElement(el, 0);
+            if (index === hidden.length - 1) updateControls();
+        }, index * 90));
+        if (!hidden.length) updateControls();
+    }
+
+    function computeScale() {
+        const fit = Math.max(0.12, Math.min(
+            window.innerWidth / CANVAS_W,
+            Math.max(180, window.innerHeight - 112) / CANVAS_H
+        ));
+        if (customScale != null) return Math.max(0.12, Math.min(1.35, customScale));
+        if (scaleMode === 'fit') return fit;
+        if (window.innerHeight > window.innerWidth) return Math.max(fit, 0.44);
+        return fit;
+    }
+
+    function applyMobileScale() {
+        if (!isMobile()) return;
+        const scale = computeScale();
+        const width = Math.round(CANVAS_W * scale);
+        const height = Math.round(CANVAS_H * scale);
+        const verticalSpace = Math.max(16, Math.round((window.innerHeight - Math.min(height, window.innerHeight - 112)) / 2));
+        document.querySelectorAll('.slide-scale').forEach((scaleEl) => {
+            scaleEl.style.setProperty('--dsa-mobile-scale', String(scale));
+            scaleEl.style.setProperty('--dsa-mobile-width', width + 'px');
+            scaleEl.style.setProperty('--dsa-mobile-height', height + 'px');
+            scaleEl.style.setProperty('--dsa-mobile-margin', verticalSpace + 'px');
+            const viewport = scaleEl.parentElement;
+            if (viewport) requestAnimationFrame(() => {
+                viewport.scrollLeft = Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2);
+                viewport.scrollTop = Math.max(0, Math.min(viewport.scrollTop, viewport.scrollHeight - viewport.clientHeight));
+            });
+        });
+    }
+
+    function zoomBy(amount) {
+        customScale = computeScale() + amount;
+        scaleMode = 'custom';
+        applyMobileScale();
+    }
+    function fitSlide() {
+        customScale = null;
+        scaleMode = 'fit';
+        applyMobileScale();
+    }
+
+    function rgbaParts(value) {
+        if (!value) return null;
+        const m = value.match(/rgba?\(\s*([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)/i);
+        if (!m) return null;
+        return { r:+m[1], g:+m[2], b:+m[3], a:m[4] == null ? 1 : +m[4] };
+    }
+    function luminance(rgb) {
+        const c = [rgb.r,rgb.g,rgb.b].map((v) => {
+            v /= 255;
+            return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4);
+        });
+        return .2126*c[0] + .7152*c[1] + .0722*c[2];
+    }
+    function effectiveBackground(el) {
+        let node = el;
+        while (node && node !== document.documentElement) {
+            const color = rgbaParts(getComputedStyle(node).backgroundColor);
+            if (color && color.a >= .72) return color;
+            node = node.parentElement;
+        }
+        return rgbaParts(getComputedStyle(document.body).backgroundColor) || {r:255,g:255,b:255,a:1};
+    }
+    function hasDirectText(el) {
+        return Array.from(el.childNodes).some((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+    }
+    function fixTextContrast() {
+        const selector = '.slide h1,.slide h2,.slide h3,.slide h4,.slide h5,.slide h6,.slide p,.slide li,.slide dt,.slide dd,.slide td,.slide th,.slide label,.slide small,.slide blockquote,.slide strong,.slide em,.slide span,.slide code';
+        document.querySelectorAll(selector).forEach((el) => {
+            if (!(el instanceof HTMLElement) || !hasDirectText(el)) return;
+            if (el.closest('pre,.code-block') && !el.matches('pre,.code-block')) return;
+            const bg = effectiveBackground(el);
+            const fg = rgbaParts(getComputedStyle(el).color);
+            if (!fg) return;
+            const bgLum = luminance(bg), fgLum = luminance(fg);
+            el.classList.remove('dsa-force-dark-text','dsa-force-light-text');
+            if (bgLum > .67 && fgLum > .62) el.classList.add('dsa-force-dark-text');
+            if (bgLum < .17 && fgLum < .28) el.classList.add('dsa-force-light-text');
+        });
+    }
+
+    function buildControls() {
+        if (document.querySelector('.dsa-mobile-controls')) return;
+        const slides = slidesArray();
+        if (!slides.length) return;
+        const controls = document.createElement('div');
+        controls.className = 'dsa-mobile-controls';
+        controls.setAttribute('role','navigation');
+        controls.setAttribute('aria-label','Mobile presentation and animation controls');
+        controls.innerHTML = `
+            <div class="dsa-mobile-controls__row">
+                <button type="button" data-action="previous-slide" aria-label="Previous slide">‹</button>
+                <span class="dsa-mobile-controls__count" aria-live="polite">1 / ${slides.length}</span>
+                <button type="button" data-action="next-slide" aria-label="Next slide">›</button>
+            </div>
+            <div class="dsa-mobile-controls__row dsa-mobile-controls__row--tools">
+                <button type="button" data-action="back-step" aria-label="Hide previous animation step">↶</button>
+                <button type="button" data-action="reveal-step" aria-label="Reveal next animation step">Reveal</button>
+                <button type="button" data-action="show-all" aria-label="Reveal all animation steps">All</button>
+                <button type="button" data-action="zoom-out" aria-label="Zoom out">−</button>
+                <button type="button" data-action="fit" aria-label="Fit entire slide">Fit</button>
+                <button type="button" data-action="zoom-in" aria-label="Zoom in">+</button>
+            </div>
+            <div class="dsa-mobile-controls__steps" aria-live="polite">Steps 0 / 0</div>`;
+        document.body.appendChild(controls);
+
+        controls.addEventListener('click', (event) => {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+            const deck = window.slides;
+            switch (button.dataset.action) {
+                case 'previous-slide':
+                    if (deck?.prev) deck.prev();
+                    break;
+                case 'next-slide':
+                    if (deck?.next) deck.next();
+                    break;
+                case 'back-step': hidePreviousStep(); break;
+                case 'reveal-step': revealNextStep(); break;
+                case 'show-all': revealAllSteps(); break;
+                case 'zoom-out': zoomBy(-0.08); break;
+                case 'fit': fitSlide(); break;
+                case 'zoom-in': zoomBy(0.08); break;
+            }
+            setTimeout(() => {
+                ensureCurrentSlideReveals();
+                updateControls();
+                fixTextContrast();
+            }, 140);
+        });
+    }
+
+    function updateControls() {
+        const controls = document.querySelector('.dsa-mobile-controls');
+        if (!controls) return;
+        const slides = slidesArray();
+        const index = Math.max(0, Math.min(slides.length - 1, currentIndex()));
+        const { all, shown, hidden } = stepState();
+        const count = controls.querySelector('.dsa-mobile-controls__count');
+        const steps = controls.querySelector('.dsa-mobile-controls__steps');
+        const previous = controls.querySelector('[data-action="previous-slide"]');
+        const next = controls.querySelector('[data-action="next-slide"]');
+        const backStep = controls.querySelector('[data-action="back-step"]');
+        const reveal = controls.querySelector('[data-action="reveal-step"]');
+        const showAll = controls.querySelector('[data-action="show-all"]');
+        count.textContent = `${index + 1} / ${slides.length}`;
+        steps.textContent = `Steps ${shown.length} / ${all.length}`;
+        previous.disabled = index <= 0;
+        next.disabled = index >= slides.length - 1;
+        backStep.disabled = shown.length === 0;
+        reveal.disabled = hidden.length === 0;
+        showAll.disabled = hidden.length === 0;
+    }
+
+    function stopSlideSwipeFromHijackingPan() {
+        window.addEventListener('touchstart', (event) => {
+            touchStartedInSlide = !!event.target.closest?.('.slide-viewport');
+        }, {capture:true, passive:true});
+        window.addEventListener('touchend', (event) => {
+            if (isMobile() && touchStartedInSlide && !event.target.closest?.('.dsa-mobile-controls')) {
+                event.stopImmediatePropagation();
+            }
+            touchStartedInSlide = false;
+        }, {capture:true, passive:true});
+        window.addEventListener('touchcancel', () => { touchStartedInSlide = false; }, {capture:true, passive:true});
+    }
+
+    function initialize() {
+        buildControls();
+        stopSlideSwipeFromHijackingPan();
+        fixTextContrast();
+        if (isMobile()) {
+            applyMobileScale();
+            setTimeout(() => {
+                ensureCurrentSlideReveals();
+                updateControls();
+                fixTextContrast();
+                applyMobileScale();
+            }, 160);
+            setTimeout(() => {
+                ensureCurrentSlideReveals();
+                updateControls();
+            }, 650);
+        }
+    }
+
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialize, {once:true});
+    else initialize();
+
+    window.addEventListener('load', () => {
+        ensureCurrentSlideReveals();
+        updateControls();
+        fixTextContrast();
+        applyMobileScale();
+    });
+    window.addEventListener('hashchange', () => setTimeout(() => {
+        ensureCurrentSlideReveals();
+        updateControls();
+        fixTextContrast();
+    }, 120));
+    window.addEventListener('resize', () => setTimeout(() => {
+        applyMobileScale();
+        ensureCurrentSlideReveals();
+        updateControls();
+        fixTextContrast();
+    }, 160));
+    document.addEventListener('keydown', () => setTimeout(updateControls, 60));
+    document.addEventListener('scroll', () => requestAnimationFrame(updateControls), {passive:true});
+    setInterval(updateControls, 800);
+})();
+</script>
+
+
+<script id="dsa-final-smart-contrast">
+(function () {
+  'use strict';
+  const DARK = 'dsa-final-dark-text';
+  const LIGHT = 'dsa-final-light-text';
+  let queued = false;
+
+  function parseColor(value) {
+    if (!value) return null;
+    const m = value.match(/rgba?\(\s*([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:\s*[,/]\s*([\d.]+))?\s*\)/i);
+    if (!m) return null;
+    return { r:+m[1], g:+m[2], b:+m[3], a:m[4] == null ? 1 : +m[4] };
+  }
+  function mix(fg, bg) {
+    const a = fg.a + bg.a * (1 - fg.a);
+    if (a <= 0) return {r:255,g:255,b:255,a:1};
+    return {
+      r:(fg.r*fg.a + bg.r*bg.a*(1-fg.a))/a,
+      g:(fg.g*fg.a + bg.g*bg.a*(1-fg.a))/a,
+      b:(fg.b*fg.a + bg.b*bg.a*(1-fg.a))/a,
+      a
+    };
+  }
+  function luminance(c) {
+    const values = [c.r,c.g,c.b].map(v => {
+      v /= 255;
+      return v <= .04045 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4);
+    });
+    return .2126*values[0] + .7152*values[1] + .0722*values[2];
+  }
+  function contrast(a,b) {
+    const l1 = luminance(a), l2 = luminance(b);
+    return (Math.max(l1,l2)+.05)/(Math.min(l1,l2)+.05);
+  }
+  function effectiveBackground(el) {
+    const chain = [];
+    let node = el;
+    while (node && node.nodeType === 1) {
+      chain.push(node);
+      node = node.parentElement;
+    }
+    let color = {r:255,g:255,b:255,a:1};
+    for (let i=chain.length-1; i>=0; i--) {
+      const parsed = parseColor(getComputedStyle(chain[i]).backgroundColor);
+      if (parsed && parsed.a > 0) color = mix(parsed, color);
+    }
+    return color;
+  }
+  function containsReadableText(el) {
+    return Array.from(el.childNodes).some(n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length);
+  }
+  function fontThreshold(el) {
+    const cs = getComputedStyle(el);
+    const size = parseFloat(cs.fontSize) || 16;
+    const weight = parseInt(cs.fontWeight,10) || 400;
+    return size >= 24 || (size >= 18.66 && weight >= 700) ? 3 : 4.5;
+  }
+  function repairContrast() {
+    const root = document.querySelector('.slide.visible') || document;
+    const selector = 'h1,h2,h3,h4,h5,h6,p,li,dt,dd,td,th,label,small,blockquote,strong,em,span,code,a,button';
+    root.querySelectorAll(selector).forEach(el => {
+      if (!(el instanceof HTMLElement) || !containsReadableText(el)) return;
+      if (el.closest('.deck-controls,.dsa-mobile-controls')) return;
+      if (el.closest('pre,.code-block') && !el.matches('pre,.code-block,code')) return;
+      el.classList.remove(DARK,LIGHT,'dsa-force-dark-text','dsa-force-light-text');
+      const fg = parseColor(getComputedStyle(el).color);
+      if (!fg) return;
+      const bg = effectiveBackground(el);
+      if (contrast(fg,bg) >= fontThreshold(el)) return;
+      const black = {r:17,g:24,b:39,a:1};
+      const white = {r:248,g:250,b:252,a:1};
+      el.classList.add(contrast(black,bg) >= contrast(white,bg) ? DARK : LIGHT);
+    });
+  }
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; repairContrast(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true});
+  else schedule();
+  window.addEventListener('load', schedule);
+  window.addEventListener('hashchange', () => setTimeout(schedule, 80));
+  window.addEventListener('resize', schedule);
+  document.addEventListener('click', () => setTimeout(schedule, 90), true);
+  document.addEventListener('keydown', () => setTimeout(schedule, 90), true);
+  setTimeout(schedule, 250);
+  setTimeout(schedule, 900);
+})();
+</script>
+
+
+<script id="dsa-uniform-presentation-size-script">
+(function () {
+  'use strict';
+  const MOBILE_QUERY = '(max-width: 1024px), (hover: none), (pointer: coarse)';
+  const CANVAS_W = 1920;
+  const CANVAS_H = 1080;
+
+  function isMobileLayout() {
+    return window.matchMedia(MOBILE_QUERY).matches;
+  }
+
+  function uniformFitScale() {
+    const horizontalPadding = 8;
+    const controlsAllowance = 52;
+    const usableWidth = Math.max(280, window.innerWidth - horizontalPadding);
+    const usableHeight = Math.max(180, window.innerHeight - controlsAllowance);
+    return Math.max(0.12, Math.min(usableWidth / CANVAS_W, usableHeight / CANVAS_H));
+  }
+
+  function applyUniformFit(resetScroll) {
+    if (!isMobileLayout()) return;
+    const scale = uniformFitScale();
+    const width = Math.round(CANVAS_W * scale);
+    const height = Math.round(CANVAS_H * scale);
+    const topSpace = Math.max(4, Math.round((Math.max(0, window.innerHeight - 52 - height)) / 2));
+
+    document.querySelectorAll('.slide-scale').forEach((scaleEl) => {
+      scaleEl.style.setProperty('--dsa-mobile-scale', String(scale));
+      scaleEl.style.setProperty('--dsa-mobile-width', width + 'px');
+      scaleEl.style.setProperty('--dsa-mobile-height', height + 'px');
+      scaleEl.style.setProperty('--dsa-mobile-margin', topSpace + 'px');
+      scaleEl.dataset.dsaUniformFit = 'true';
+
+      const viewport = scaleEl.parentElement;
+      if (viewport && resetScroll) {
+        requestAnimationFrame(() => {
+          viewport.scrollLeft = 0;
+          viewport.scrollTop = 0;
+        });
+      }
+    });
+  }
+
+  function changeOriginalMobileDefault() {
+    /* The existing controller starts in a larger reading mode. Trigger its Fit
+       action once, then reinforce the exact same fit on every slide. */
+    const fitButton = document.querySelector('.dsa-mobile-controls [data-action="fit"]');
+    if (fitButton && !fitButton.dataset.dsaAutoFitDone) {
+      fitButton.dataset.dsaAutoFitDone = 'true';
+      fitButton.click();
+    }
+    applyUniformFit(true);
+  }
+
+  function init() {
+    if (!isMobileLayout()) return;
+    changeOriginalMobileDefault();
+    setTimeout(changeOriginalMobileDefault, 120);
+    setTimeout(changeOriginalMobileDefault, 500);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+  window.addEventListener('load', init);
+  window.addEventListener('orientationchange', () => setTimeout(() => applyUniformFit(true), 160));
+  window.addEventListener('resize', () => applyUniformFit(true));
+  window.addEventListener('hashchange', () => setTimeout(() => applyUniformFit(true), 40));
+})();
+</script>
+
+
+<style id="student-copy-credit-style">
+.dsa-student-copy-credit {
+  position: fixed; left: 26px; bottom: 24px; z-index: 9999;
+  font: 600 13px/1.2 Arial, sans-serif; letter-spacing: .04em;
+  color: rgba(174, 187, 208, .72); pointer-events: none;
+}
+</style>
+<div class="dsa-student-copy-credit" aria-hidden="true">Student Copy | Dave Bryan J. Beatingo</div>
+</body>
+</html>
