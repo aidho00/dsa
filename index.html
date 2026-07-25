@@ -1,0 +1,769 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#FF5722">
+<meta name="description" content="Data Structures and Algorithms class materials using Java.">
+<title>Data Structures and Algorithms | Class Materials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --background:#fafafa; --surface:#ffffff; --foreground:#1a1a1a;
+  --muted:#667085; --accent:#FF5722; --accent-2:#F4511E;
+  --accent-soft:#FFE0D6; --line:#F0D4CA; --success:#15803D; --danger:#B42318;
+  --display:'Archivo Black',sans-serif; --body:'Space Grotesk',sans-serif; --mono:'JetBrains Mono',monospace;
+  --shadow:0 18px 50px rgba(255,87,34,.14);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:var(--background);color:var(--foreground);font-family:var(--body);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background:
+  radial-gradient(circle at 8% 5%,rgba(255,87,34,.13),transparent 26rem),
+  radial-gradient(circle at 92% 18%,rgba(244,81,30,.08),transparent 24rem),
+  linear-gradient(var(--background),#FFF9F6)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;opacity:.4;background-image:
+  linear-gradient(rgba(255,87,34,.055) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,87,34,.055) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,#000,transparent 88%)}
+a{color:inherit} button,input{font:inherit}
+.shell{width:min(1180px,calc(100% - 34px));margin:auto}
+.site-header{position:sticky;top:0;z-index:30;border-bottom:1px solid rgba(255,87,34,.15);background:rgba(250,250,250,.89);backdrop-filter:blur(18px)}
+.header-row{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand-mark{width:46px;height:46px;display:grid;place-items:center;background:var(--accent);border-radius:3px;box-shadow:8px 8px 0 var(--accent-soft)}
+.brand-mark svg{width:28px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brand strong{font-family:var(--display);font-size:15px;font-weight:400}
+.brand small{display:block;margin-top:2px;color:var(--muted);font-size:12px}
+.header-code{font:600 12px var(--mono);letter-spacing:.14em;color:var(--accent)}
+.hero{padding:88px 0 58px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.55fr);gap:54px;align-items:center}
+.eyebrow,.section-kicker{font:600 12px var(--mono);letter-spacing:.2em;color:var(--accent)}
+.hero h1,h2,h3{font-family:var(--display);font-weight:400}
+.hero h1{font-size:clamp(48px,7vw,88px);line-height:.96;letter-spacing:-.052em;margin:20px 0 26px;max-width:900px}
+.hero h1 span{color:var(--accent)}
+.course-description{font-size:clamp(16px,1.8vw,20px);line-height:1.75;color:#475467;max-width:850px;margin:0}
+.hero-panel{position:relative;min-height:330px;background:#1A1A1A;color:#fff;padding:30px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:18px 18px 0 var(--accent-soft);overflow:hidden;border-top:7px solid var(--accent)}
+.hero-panel::after{content:"32";position:absolute;right:-8px;bottom:-34px;font-family:var(--display);font-size:190px;line-height:1;color:rgba(255,87,34,.22)}
+.hero-panel strong{font-family:var(--display);font-size:24px;font-weight:400;line-height:1.2;position:relative;z-index:1}
+.hero-panel p{margin:0;max-width:250px;font-size:14px;line-height:1.6;color:#D0D5DD;position:relative;z-index:1}
+.meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:30px}
+.meta-chip{border:1px solid var(--line);background:rgba(255,255,255,.78);padding:10px 13px;font-size:13px;color:#475467}
+.meta-chip b{color:var(--foreground)}
+.controls-wrap{position:sticky;top:74px;z-index:20;padding:12px 0;background:linear-gradient(to bottom,rgba(250,250,250,.98),rgba(250,250,250,.88),transparent)}
+.controls{display:grid;grid-template-columns:1fr minmax(260px,360px);gap:14px;border:1px solid var(--line);background:rgba(255,255,255,.91);padding:12px;box-shadow:var(--shadow)}
+.term-filters{display:flex;gap:7px;overflow:auto;scrollbar-width:none} .term-filters::-webkit-scrollbar{display:none}
+.filter-btn{white-space:nowrap;border:0;background:transparent;color:var(--muted);padding:11px 14px;cursor:pointer;font-weight:700;font-size:13px}
+.filter-btn:hover{background:#FFF0EA;color:var(--accent)} .filter-btn.active{background:var(--accent);color:#fff}
+.search-box{position:relative} .search-box svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;fill:none;stroke:#667085;stroke-width:2}
+#lessonSearch{width:100%;border:1px solid var(--line);background:#fff;color:var(--foreground);padding:11px 14px 11px 42px;outline:none}
+#lessonSearch:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,87,34,.12)}
+main{padding:18px 0 90px}
+.term-section{padding:56px 0 20px;scroll-margin-top:160px}
+.section-heading{display:grid;grid-template-columns:minmax(260px,.8fr) 1.2fr;gap:28px;align-items:end;margin-bottom:24px}
+.section-heading h2{font-size:clamp(31px,4vw,48px);line-height:1.02;letter-spacing:-.035em;margin:8px 0 0}
+.section-heading p{margin:0;color:var(--muted);line-height:1.7;max-width:680px}
+.term-number{display:none}
+.lesson-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.lesson-card{position:relative;min-height:244px;display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);padding:20px;overflow:hidden;transition:.22s ease;box-shadow:0 10px 30px rgba(16,24,40,.035)}
+.lesson-card::before{content:"";position:absolute;left:0;top:0;width:5px;height:100%;background:var(--accent);transform:scaleY(.22);transform-origin:top;transition:.22s ease}
+.lesson-card:hover{transform:translateY(-4px);border-color:#FFAA8D;box-shadow:var(--shadow)} .lesson-card:hover::before{transform:scaleY(1)}
+.card-index{position:absolute;right:14px;bottom:-13px;font-family:var(--display);font-size:86px;line-height:1;color:rgba(255,87,34,.07);pointer-events:none}
+.lesson-card__top{display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;z-index:1}
+.session-label{font:600 11px var(--mono);letter-spacing:.15em;color:var(--accent)}
+.availability{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.availability-dot{width:7px;height:7px;border-radius:50%;background:#F79009} .lesson-card.available .availability-dot{background:var(--success)} .lesson-card.locked .availability-dot{background:var(--danger)}
+.lesson-card h3{position:relative;z-index:1;font-family:var(--body);font-size:21px;line-height:1.34;letter-spacing:-.025em;margin:31px 0 30px;max-width:94%}
+.lesson-actions{margin-top:auto;position:relative;z-index:1}
+.open-lesson{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;background:var(--accent);color:#fff;padding:0 16px;font-size:12px;font-weight:700}
+.open-lesson:hover{background:#D84315} .open-lesson svg{width:17px;fill:none;stroke:currentColor;stroke-width:2}
+.locked-message{margin-top:auto;border:1px dashed #F3A6A0;background:#FFF6F3;padding:12px;display:flex;align-items:center;gap:11px;position:relative;z-index:1}
+.locked-message[hidden]{display:none} .locked-message strong{display:block;color:#912018;font-size:13px} .locked-message small{display:block;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.35}
+.lesson-card.locked{background:#F8F8F8;filter:saturate(.68)} .lesson-card.locked:hover{transform:none;box-shadow:none;border-color:var(--line)} .lesson-card.locked .lesson-actions{display:none}
+.empty-state{display:none;border:1px dashed var(--line);background:#fff;text-align:center;padding:52px 20px;color:var(--muted);margin-top:30px} .empty-state.show{display:block}
+footer{border-top:1px solid var(--line);background:#fff;padding:32px 0 42px;color:var(--muted);font-size:13px}
+.footer-row{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap} footer strong{color:var(--foreground)}
+@media(max-width:940px){.hero-grid{grid-template-columns:1fr}.hero-panel{min-height:240px}.lesson-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-heading{grid-template-columns:1fr;gap:14px}.controls{grid-template-columns:1fr}}
+@media(max-width:620px){.shell{width:min(100% - 22px,1180px)}.header-row{min-height:64px}.header-code{display:none}.brand-mark{width:40px;height:40px}.hero{padding:54px 0 38px}.hero h1{font-size:43px}.hero-panel{min-height:210px;padding:24px;box-shadow:10px 10px 0 var(--accent-soft)}.hero-panel::after{font-size:145px}.controls-wrap{top:64px}.controls{padding:9px}.lesson-grid{grid-template-columns:1fr}.term-section{padding-top:42px}.lesson-card{min-height:218px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body id="top">
+<header class="site-header">
+  <div class="shell header-row">
+    <a class="brand" href="#top" aria-label="Return to top">
+      <span class="brand-mark"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.3"></circle><circle cx="18" cy="6" r="2.3"></circle><circle cx="12" cy="18" r="2.3"></circle><path d="M8 6h8M7.2 8l3.6 7.6M16.8 8l-3.6 7.6"></path></svg></span>
+      <span><strong>Data Structures and Algorithms</strong><small>Java Lesson Materials</small></span>
+    </a>
+    
+  </div>
+</header>
+<section class="hero">
+  <div class="shell hero-grid">
+    <div>
+      <span class="eyebrow">DATA STRUCTURES &amp; ALGORITHMS</span>
+      <h1>Learn to solve problems with <span>Java.</span></h1>
+      <p class="course-description">Data Structures and Algorithms develops students’ ability to solve programming problems using Java. The course begins with essential Java foundations and progresses through arrays, searching, sorting, linked structures, stacks, queues, hash maps, trees, graphs, and recursion, with emphasis on clear logic, efficiency, and practical implementation.</p>
+      <div class="meta-row">
+        
+      </div>
+    </div>
+    
+  </div>
+</section>
+<div class="controls-wrap">
+  <div class="shell controls">
+    <div class="term-filters" aria-label="Filter lessons by academic term">
+      <button class="filter-btn active" type="button" data-filter="all">All Lessons</button>
+      <button class="filter-btn" type="button" data-filter="prelim">Prelim</button>
+      <button class="filter-btn" type="button" data-filter="midterm">Midterm</button>
+      <button class="filter-btn" type="button" data-filter="semifinal">Semi Final</button>
+      <button class="filter-btn" type="button" data-filter="final">Final</button>
+    </div>
+    <label class="search-box">
+      <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      <input id="lessonSearch" type="search" placeholder="Search lessons…" autocomplete="off" aria-label="Search lessons">
+    </label>
+  </div>
+</div>
+<main class="shell">
+<section class="term-section" id="prelim" data-section-term="prelim">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">01</span>
+      <h2>Prelim Lessons</h2>
+    </div>
+    <div class="term-number" aria-hidden="true"></div>
+    <p>Java foundations, input, operators, decisions, and repetition—the essential skills needed before studying data structures.</p>
+  </div>
+  <div class="lesson-grid"><article class="lesson-card" data-file="P-1.html" data-search="prelim lesson 1 what are algorithms and data structures? java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">01</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 01</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>What Are Algorithms and Data Structures?</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-1.html" aria-label="Open Lesson 1: What Are Algorithms and Data Structures?">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="P-2.html" data-search="prelim lesson 2 your first java program java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">02</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 02</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Your First Java Program</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-2.html" aria-label="Open Lesson 2: Your First Java Program">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="P-3.html" data-search="prelim lesson 3 variables and data types java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">03</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 03</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Variables and Data Types</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-3.html" aria-label="Open Lesson 3: Variables and Data Types">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="P-4.html" data-search="prelim lesson 4 input with scanner java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">04</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 04</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Input with Scanner</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-4.html" aria-label="Open Lesson 4: Input with Scanner">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="P-5.html" data-search="prelim lesson 5 operators and calculations java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">05</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 05</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Operators and Calculations</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-5.html" aria-label="Open Lesson 5: Operators and Calculations">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="P-6.html" data-search="prelim lesson 6 conditions with if and else java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">06</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 06</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Conditions with if and else</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-6.html" aria-label="Open Lesson 6: Conditions with if and else">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="P-7.html" data-search="prelim lesson 7 repetition with for loops java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">07</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 07</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Repetition with for Loops</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-7.html" aria-label="Open Lesson 7: Repetition with for Loops">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="P-8.html" data-search="prelim lesson 8 while loops and simple menus java data structures algorithms" data-term="prelim">
+  <div class="card-index" aria-hidden="true">08</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 08</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>while Loops and Simple Menus</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="P-8.html" aria-label="Open Lesson 8: while Loops and Simple Menus">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article></div>
+</section><section class="term-section" id="midterm" data-section-term="midterm">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">02</span>
+      <h2>Midterm Lessons</h2>
+    </div>
+    <div class="term-number" aria-hidden="true"></div>
+    <p>Methods, arrays, problem-solving strategies, searching, basic complexity, and the foundations of sorting.</p>
+  </div>
+  <div class="lesson-grid"><article class="lesson-card" data-file="M-1.html" data-search="midterm lesson 9 methods java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">09</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 09</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Methods</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-1.html" aria-label="Open Lesson 9: Methods">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="M-2.html" data-search="midterm lesson 10 arrays java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">10</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 10</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Arrays</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-2.html" aria-label="Open Lesson 10: Arrays">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="M-3.html" data-search="midterm lesson 11 problem-solving recipe java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">11</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 11</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Problem-Solving Recipe</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-3.html" aria-label="Open Lesson 11: Problem-Solving Recipe">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="M-4.html" data-search="midterm lesson 12 linear search java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">12</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 12</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Linear Search</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-4.html" aria-label="Open Lesson 12: Linear Search">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="M-5.html" data-search="midterm lesson 13 big o without fear java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">13</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 13</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Big O Without Fear</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-5.html" aria-label="Open Lesson 13: Big O Without Fear">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="M-6.html" data-search="midterm lesson 14 nested loops and simple analysis java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">14</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 14</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Nested Loops and Simple Analysis</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-6.html" aria-label="Open Lesson 14: Nested Loops and Simple Analysis">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="M-7.html" data-search="midterm lesson 15 why we sort java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">15</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 15</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Why We Sort</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-7.html" aria-label="Open Lesson 15: Why We Sort">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="M-8.html" data-search="midterm lesson 16 bubble sort java data structures algorithms" data-term="midterm">
+  <div class="card-index" aria-hidden="true">16</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 16</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Bubble Sort</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="M-8.html" aria-label="Open Lesson 16: Bubble Sort">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article></div>
+</section><section class="term-section" id="semifinal" data-section-term="semifinal">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">03</span>
+      <h2>Semi Final Lessons</h2>
+    </div>
+    <div class="term-number" aria-hidden="true"></div>
+    <p>Selection and insertion sorting, binary search, object-oriented foundations, dynamic collections, linked lists, and stacks.</p>
+  </div>
+  <div class="lesson-grid"><article class="lesson-card" data-file="SF-1.html" data-search="semifinal lesson 17 selection sort java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">17</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 17</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Selection Sort</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-1.html" aria-label="Open Lesson 17: Selection Sort">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="SF-2.html" data-search="semifinal lesson 18 insertion sort java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">18</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 18</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Insertion Sort</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-2.html" aria-label="Open Lesson 18: Insertion Sort">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="SF-3.html" data-search="semifinal lesson 19 binary search java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">19</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 19</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Binary Search</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-3.html" aria-label="Open Lesson 19: Binary Search">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="SF-4.html" data-search="semifinal lesson 20 classes and objects java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">20</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 20</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Classes and Objects</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-4.html" aria-label="Open Lesson 20: Classes and Objects">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="SF-5.html" data-search="semifinal lesson 21 references and node objects java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">21</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 21</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>References and Node Objects</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-5.html" aria-label="Open Lesson 21: References and Node Objects">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="SF-6.html" data-search="semifinal lesson 22 arraylist java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">22</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 22</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>ArrayList</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-6.html" aria-label="Open Lesson 22: ArrayList">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="SF-7.html" data-search="semifinal lesson 23 linked lists java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">23</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 23</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Linked Lists</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-7.html" aria-label="Open Lesson 23: Linked Lists">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="SF-8.html" data-search="semifinal lesson 24 stack java data structures algorithms" data-term="semifinal">
+  <div class="card-index" aria-hidden="true">24</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 24</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Stack</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="SF-8.html" aria-label="Open Lesson 24: Stack">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article></div>
+</section><section class="term-section" id="final" data-section-term="final">
+  <div class="section-heading">
+    <div>
+      <span class="section-kicker">04</span>
+      <h2>Final Lessons</h2>
+    </div>
+    <div class="term-number" aria-hidden="true"></div>
+    <p>Queues, hash maps, trees, traversals, graphs, breadth-first and depth-first search, and recursion.</p>
+  </div>
+  <div class="lesson-grid"><article class="lesson-card" data-file="F-1.html" data-search="final lesson 25 queue java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">25</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 25</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Queue</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-1.html" aria-label="Open Lesson 25: Queue">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="F-2.html" data-search="final lesson 26 hashmap java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">26</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 26</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>HashMap</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-2.html" aria-label="Open Lesson 26: HashMap">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="F-3.html" data-search="final lesson 27 binary trees java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">27</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 27</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Binary Trees</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-3.html" aria-label="Open Lesson 27: Binary Trees">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="F-4.html" data-search="final lesson 28 tree traversals java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">28</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 28</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Tree Traversals</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-4.html" aria-label="Open Lesson 28: Tree Traversals">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="F-5.html" data-search="final lesson 29 binary search trees java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">29</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 29</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Binary Search Trees</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-5.html" aria-label="Open Lesson 29: Binary Search Trees">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="F-6.html" data-search="final lesson 30 graphs java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">30</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 30</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Graphs</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-6.html" aria-label="Open Lesson 30: Graphs">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="F-7.html" data-search="final lesson 31 breadth-first search and depth-first search java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">31</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 31</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Breadth-First Search and Depth-First Search</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-7.html" aria-label="Open Lesson 31: Breadth-First Search and Depth-First Search">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article><article class="lesson-card" data-file="F-8.html" data-search="final lesson 32 recursion java data structures algorithms" data-term="final">
+  <div class="card-index" aria-hidden="true">32</div>
+  <div class="lesson-card__top">
+    <span class="session-label">Lesson 32</span>
+    <span class="availability" aria-live="polite"><span class="availability-dot"></span><span class="availability-text">Checking</span></span>
+  </div>
+  <h3>Recursion</h3>
+  <div class="lesson-actions">
+    <a class="open-lesson" href="F-8.html" aria-label="Open Lesson 32: Recursion">
+      <span>Open Lesson</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+  <div class="locked-message" hidden>
+    <span aria-hidden="true">🔒</span>
+    <div><strong>Not Yet Available</strong><small>This lesson will unlock when its file is uploaded.</small></div>
+  </div>
+</article></div>
+</section>
+<div class="empty-state" id="emptyState"><strong>No matching lessons found.</strong><br>Try another keyword or academic term.</div>
+</main>
+<footer>
+  <div class="shell footer-row">
+    <span><strong>Data Structures and Algorithms</strong><br>ACT <br> Instructor: Dave Bryan J. Beatingo</span>
+  </div>
+</footer>
+<script>
+const cards=[...document.querySelectorAll('.lesson-card')];
+const sections=[...document.querySelectorAll('.term-section')];
+const search=document.getElementById('lessonSearch');
+const empty=document.getElementById('emptyState');
+let activeFilter='all';
+function applyFilters(){
+  const q=search.value.trim().toLowerCase(); let visible=0;
+  cards.forEach(card=>{
+    const show=(activeFilter==='all'||card.dataset.term===activeFilter)&&(!q||card.dataset.search.includes(q));
+    card.hidden=!show; if(show) visible++;
+  });
+  sections.forEach(section=>{section.hidden=![...section.querySelectorAll('.lesson-card')].some(card=>!card.hidden)});
+  empty.classList.toggle('show',visible===0);
+}
+document.querySelectorAll('.filter-btn').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.filter-btn').forEach(item=>item.classList.remove('active'));
+  btn.classList.add('active'); activeFilter=btn.dataset.filter; applyFilters();
+}));
+search.addEventListener('input',applyFilters);
+async function fileExists(url){
+  if(location.protocol==='file:') return true;
+  try{
+    let response=await fetch(url,{method:'HEAD',cache:'no-store'});
+    if(response.ok) return true;
+    if(response.status===405||response.status===501){
+      response=await fetch(url,{method:'GET',headers:{Range:'bytes=0-0'},cache:'no-store'});
+      return response.ok||response.status===206;
+    }
+    return false;
+  }catch(error){return false}
+}
+async function checkAvailability(){
+  await Promise.all(cards.map(async card=>{
+    const exists=await fileExists(card.dataset.file);
+    card.classList.toggle('available',exists); card.classList.toggle('locked',!exists);
+    card.querySelector('.availability-text').textContent=exists?'Available':'Locked';
+    const link=card.querySelector('.open-lesson'); const locked=card.querySelector('.locked-message');
+    if(exists){link.href=card.dataset.file;link.removeAttribute('aria-disabled');locked.hidden=true}
+    else{link.removeAttribute('href');link.setAttribute('aria-disabled','true');locked.hidden=false}
+  }));
+}
+applyFilters(); checkAvailability();
+</script>
+</body>
+</html>

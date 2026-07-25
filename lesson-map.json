@@ -1,0 +1,226 @@
+[
+  {
+    "lesson": 1,
+    "title": "What Are Algorithms and Data Structures?",
+    "term": "prelim",
+    "file": "P-1.html",
+    "source": "Lesson_1_Algorithms_and_Data_Structures.html"
+  },
+  {
+    "lesson": 2,
+    "title": "Your First Java Program",
+    "term": "prelim",
+    "file": "P-2.html",
+    "source": "Lesson_2_Your_First_Java_Program.html"
+  },
+  {
+    "lesson": 3,
+    "title": "Variables and Data Types",
+    "term": "prelim",
+    "file": "P-3.html",
+    "source": "Lesson_3_Variables_and_Data_Types.html"
+  },
+  {
+    "lesson": 4,
+    "title": "Input with Scanner",
+    "term": "prelim",
+    "file": "P-4.html",
+    "source": "Lesson_4_Input_with_Scanner.html"
+  },
+  {
+    "lesson": 5,
+    "title": "Operators and Calculations",
+    "term": "prelim",
+    "file": "P-5.html",
+    "source": "Lesson_5_Operators_and_Calculations.html"
+  },
+  {
+    "lesson": 6,
+    "title": "Conditions with if and else",
+    "term": "prelim",
+    "file": "P-6.html",
+    "source": "Lesson_6_Conditions_with_if_and_else.html"
+  },
+  {
+    "lesson": 7,
+    "title": "Repetition with for Loops",
+    "term": "prelim",
+    "file": "P-7.html",
+    "source": "Lesson_7_Repetition_with_for_Loops.html"
+  },
+  {
+    "lesson": 8,
+    "title": "while Loops and Simple Menus",
+    "term": "prelim",
+    "file": "P-8.html",
+    "source": "Lesson_8_While_Loops_and_Simple_Menus(1).html"
+  },
+  {
+    "lesson": 9,
+    "title": "Methods",
+    "term": "midterm",
+    "file": "M-1.html",
+    "source": "Lesson_9_Methods(1).html"
+  },
+  {
+    "lesson": 10,
+    "title": "Arrays",
+    "term": "midterm",
+    "file": "M-2.html",
+    "source": "Lesson_10_Arrays(1).html"
+  },
+  {
+    "lesson": 11,
+    "title": "Problem-Solving Recipe",
+    "term": "midterm",
+    "file": "M-3.html",
+    "source": "Lesson_11_Problem_Solving_Recipe_FIXED.html"
+  },
+  {
+    "lesson": 12,
+    "title": "Linear Search",
+    "term": "midterm",
+    "file": "M-4.html",
+    "source": "Lesson_12_Linear_Search.html"
+  },
+  {
+    "lesson": 13,
+    "title": "Big O Without Fear",
+    "term": "midterm",
+    "file": "M-5.html",
+    "source": "Lesson_13_Big_O_Without_Fear.html"
+  },
+  {
+    "lesson": 14,
+    "title": "Nested Loops and Simple Analysis",
+    "term": "midterm",
+    "file": "M-6.html",
+    "source": "Lesson_14_Nested_Loops_and_Simple_Analysis.html"
+  },
+  {
+    "lesson": 15,
+    "title": "Why We Sort",
+    "term": "midterm",
+    "file": "M-7.html",
+    "source": "Lesson_15_Why_We_Sort.html"
+  },
+  {
+    "lesson": 16,
+    "title": "Bubble Sort",
+    "term": "midterm",
+    "file": "M-8.html",
+    "source": "Lesson_16_Bubble_Sort.html"
+  },
+  {
+    "lesson": 17,
+    "title": "Selection Sort",
+    "term": "semifinal",
+    "file": "SF-1.html",
+    "source": "Lesson_17_Selection_Sort.html"
+  },
+  {
+    "lesson": 18,
+    "title": "Insertion Sort",
+    "term": "semifinal",
+    "file": "SF-2.html",
+    "source": "Lesson_18_Insertion_Sort.html"
+  },
+  {
+    "lesson": 19,
+    "title": "Binary Search",
+    "term": "semifinal",
+    "file": "SF-3.html",
+    "source": "Lesson_19_Binary_Search(1).html"
+  },
+  {
+    "lesson": 20,
+    "title": "Classes and Objects",
+    "term": "semifinal",
+    "file": "SF-4.html",
+    "source": "Lesson_20_Classes_and_Objects.html"
+  },
+  {
+    "lesson": 21,
+    "title": "References and Node Objects",
+    "term": "semifinal",
+    "file": "SF-5.html",
+    "source": "Lesson_21_References_and_Node_Objects.html"
+  },
+  {
+    "lesson": 22,
+    "title": "ArrayList",
+    "term": "semifinal",
+    "file": "SF-6.html",
+    "source": "Lesson_22_ArrayList.html"
+  },
+  {
+    "lesson": 23,
+    "title": "Linked Lists",
+    "term": "semifinal",
+    "file": "SF-7.html",
+    "source": "Lesson_23_Linked_Lists.html"
+  },
+  {
+    "lesson": 24,
+    "title": "Stack",
+    "term": "semifinal",
+    "file": "SF-8.html",
+    "source": "Lesson_24_Stack.html"
+  },
+  {
+    "lesson": 25,
+    "title": "Queue",
+    "term": "final",
+    "file": "F-1.html",
+    "source": "Lesson_25_Queue.html"
+  },
+  {
+    "lesson": 26,
+    "title": "HashMap",
+    "term": "final",
+    "file": "F-2.html",
+    "source": "Lesson_26_HashMap.html"
+  },
+  {
+    "lesson": 27,
+    "title": "Binary Trees",
+    "term": "final",
+    "file": "F-3.html",
+    "source": "Lesson_27_Binary_Trees.html"
+  },
+  {
+    "lesson": 28,
+    "title": "Tree Traversals",
+    "term": "final",
+    "file": "F-4.html",
+    "source": "Lesson_28_Tree_Traversals.html"
+  },
+  {
+    "lesson": 29,
+    "title": "Binary Search Trees",
+    "term": "final",
+    "file": "F-5.html",
+    "source": "Lesson_29_Binary_Search_Trees.html"
+  },
+  {
+    "lesson": 30,
+    "title": "Graphs",
+    "term": "final",
+    "file": "F-6.html",
+    "source": "Lesson_30_Graphs.html"
+  },
+  {
+    "lesson": 31,
+    "title": "Breadth-First Search and Depth-First Search",
+    "term": "final",
+    "file": "F-7.html",
+    "source": "Lesson_31_BFS_and_DFS.html"
+  },
+  {
+    "lesson": 32,
+    "title": "Recursion",
+    "term": "final",
+    "file": "F-8.html",
+    "source": "Lesson_32_Recursion.html"
+  }
+]
